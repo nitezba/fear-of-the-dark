@@ -17,10 +17,7 @@ class Entity() :
         # NEW (maybe - i think i can flag) : return tuple,
         # nnvm that doesnt work cuz we're supposed to be removing from the world dict
         # HOWEVER, MAYBE WE CAN LEAVE IT IN THE WORLD AND JUS USE AN EXTERNAL FLAG TO MARK IT AS INACTIVE
-    def move(self, direction : str) -> int:
-        x_borders = [0, 9]
-        y_borders = [0, 8]
-        
+    def move(self, direction : str) -> tuple:
         self.facing = direction
         original_pos = [self.pos[0], self.pos[1]]
         if direction == 'u' :
@@ -35,12 +32,12 @@ class Entity() :
         # self.pos ends up (temporarily) being the new pos, until it gets error corrected if needed
 
         # world collision handling
+        # NOTE: in the case of collision, we return the coords of the block we just collided with
         if tuple(self.pos) in world[self.curr_room].keys() :
             if world[self.curr_room][tuple(self.pos)] == 4 :
-                GamePrint("something blocks your path.")
                 invalid_pos = [self.pos[0], self.pos[1]]
                 self.pos = original_pos
-                return world[self.curr_room][tuple(invalid_pos)]
+                return tuple(invalid_pos)
 
         # ==========================================
         if self.pos[1] > 8 : # down room change
@@ -101,11 +98,8 @@ class Entity() :
 
         print("new pos", self.pos, " in room, ", self.curr_room)
         GamePrint("every step you take could be the end")
-        # if it's some tile, which we've already checked is not a wall/invalid tile
-        if tuple(self.pos) in world[self.curr_room].keys() :
-            return world[self.curr_room][tuple(self.pos)]
         
-        return -1
+        return tuple(self.pos)
 
     # there should be a limit on the number of times you can stretch your hand out
     # there should also be some other way to interact with the world, maybe different responses for walking into stuff

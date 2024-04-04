@@ -81,16 +81,16 @@ while playing:
             if event.key == K_ESCAPE:
                 playing = False
             if event.key == K_w:
-                new_tile = player.move('u')
+                new_tile : tuple = player.move('u')
                 pygame.mixer.Sound.play(s_step)
             if event.key == K_a:
-                new_tile = player.move('l')
+                new_tile : tuple = player.move('l')
                 pygame.mixer.Sound.play(s_step)
             if event.key == K_s:
-                new_tile = player.move('d')
+                new_tile : tuple = player.move('d')
                 pygame.mixer.Sound.play(s_step)
             if event.key == K_d:
-                new_tile = player.move('r')
+                new_tile : tuple = player.move('r')
                 pygame.mixer.Sound.play(s_step)
             if event.key == K_SPACE :
                 player.stretch()
@@ -101,13 +101,18 @@ while playing:
                 render_player = not render_player
             print(new_tile)
 
-    if new_tile == 7:
-        GamePrint("The world becomes clearer to you.")
-        render_world = True
-        # need to find that item in our world dict and remove it though
-    if new_tile == 8:
-        GamePrint("You seem to step outside yourself.")
-        render_player = True
+    # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT
+    if new_tile in world[player.curr_room].keys() :
+        if world[player.curr_room][new_tile] == 7:
+            GamePrint("The world becomes clearer to you.")
+            render_world = True
+            # need to find that item in our world dict and remove it though
+        if world[player.curr_room][new_tile] == 8:
+            GamePrint("You seem to step outside yourself.")
+            render_player = True
+        if world[player.curr_room][new_tile] == 4:
+            GamePrint("something blocks your path.")
+        
 
 
     # game area
