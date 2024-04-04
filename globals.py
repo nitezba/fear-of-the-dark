@@ -26,7 +26,6 @@ def load_image(path):
     img.set_colorkey((0, 0, 0))
     return img
 
-
 chars = load_image('./letters/alphabet.png')
 alphanumeric = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9', ' ', '.']
 # 40 CHARACTERS FIT IN A LINE BEFORE OVERFLOW
@@ -45,6 +44,7 @@ def TextToImg(text : str) -> list:
 
     return sentence
 
+# TODO : make it print one color for text that describes user action and another color for text that responds to that action
 on_screen_text = [] # should only ever have size five
 def GamePrint(text : str) :
     if len(text) <= 40 :

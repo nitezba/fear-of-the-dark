@@ -73,6 +73,7 @@ while playing:
     raw_window.fill((0,0,0))
 
     new_tile = None
+    touched_tile = None
     for event in pygame.event.get() :
         if event.type == QUIT:
             pygame.quit()
@@ -82,22 +83,17 @@ while playing:
                 playing = False
             if event.key == K_w:
                 new_tile : tuple = player.move('u')
-                pygame.mixer.Sound.play(s_step)
             if event.key == K_a:
                 new_tile : tuple = player.move('l')
-                pygame.mixer.Sound.play(s_step)
             if event.key == K_s:
                 new_tile : tuple = player.move('d')
-                pygame.mixer.Sound.play(s_step)
             if event.key == K_d:
                 new_tile : tuple = player.move('r')
-                pygame.mixer.Sound.play(s_step)
             if event.key == K_SPACE :
-                player.stretch()
+                touched_tile : tuple = player.stretch()
             if event.key == K_m :
                 render_world = not render_world
             if event.key == K_p :
-                print("flip")
                 render_player = not render_player
             print(new_tile)
 
@@ -112,8 +108,14 @@ while playing:
             render_player = True
         if world[player.curr_room][new_tile] == 4:
             GamePrint("something blocks your path.")
-        
 
+    if touched_tile in world[player.curr_room].keys() :
+        if world[player.curr_room][touched_tile] == 4 :
+            GamePrint("the cold indifference of the wall seems to slap you in the face")
+    else :
+        if touched_tile != None :
+            # we have stretched out our hand and found nothing
+            GamePrint("you find nothing...")
 
     # game area
     if render_world :

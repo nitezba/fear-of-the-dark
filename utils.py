@@ -18,6 +18,8 @@ class Entity() :
         # nnvm that doesnt work cuz we're supposed to be removing from the world dict
         # HOWEVER, MAYBE WE CAN LEAVE IT IN THE WORLD AND JUS USE AN EXTERNAL FLAG TO MARK IT AS INACTIVE
     def move(self, direction : str) -> tuple:
+        # TODO : move this into the if blocks so you can play a different sound based on what you actually end up doing
+        pygame.mixer.Sound.play(s_step)
         self.facing = direction
         original_pos = [self.pos[0], self.pos[1]]
         if direction == 'u' :
@@ -40,10 +42,12 @@ class Entity() :
                 return tuple(invalid_pos)
 
         # ==========================================
-        if self.pos[1] > 8 : # down room change
+        # walk to different room - y direction
+        if self.pos[1] > 8 : # down
             if self.curr_room[0] == '1' : # off screen
                 GamePrint("only nothingness awaits you there")
                 self.pos = original_pos
+                # NOTE : this return is different from the rest - fine for now but fix later
                 return -1 # might need to be different since this is the same as a successful step
             else : # just move down normally
                 GamePrint("southbound for some reason")
@@ -54,7 +58,7 @@ class Entity() :
                 new_room_num = str(new_level) + room
                 self.curr_room = new_room_num
                 self.pos = [original_pos[0], 0]
-        if self.pos[1] < 0 :
+        if self.pos[1] < 0 : # up
             GamePrint("reach for da stars")
             prev_level : int = int(self.curr_room[0])
             room : str = self.curr_room[1:3]
@@ -103,9 +107,8 @@ class Entity() :
 
     # there should be a limit on the number of times you can stretch your hand out
     # there should also be some other way to interact with the world, maybe different responses for walking into stuff
-    def stretch(self) -> int:
+    def stretch(self) -> tuple:
         pygame.mixer.Sound.play(s_hand)
-        # on_screen_text.append(TextToImg("you stretch your hand into the unknown."))
         GamePrint("you stretch your hand into the unknown.")
         front : tuple = None
         if self.facing == 'u' :
@@ -117,13 +120,4 @@ class Entity() :
         if self.facing == 'r' :
             front = (self.pos[0] + 1, self.pos[1])
             
-        ret = world['1-0'][front] if front in world['1-0'].keys() else -1
-        # TODO: this isn't returning what i think it is sometimes, second to last room is where i found this
-        if ret == -1:
-            GamePrint("you find nothing...")
-        if ret == 4:
-            GamePrint("you meet the cold indifference of the wall")
-        # maybe this could hurt if you stretch and touch something bad, but you
-        # still only get a limited number of stretches (your arm gets tired)
-        
-        return ret
+        return front
