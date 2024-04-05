@@ -101,7 +101,7 @@ class Entity() :
 
 
         print("new pos", self.pos, " in room, ", self.curr_room)
-        GamePrint("every step you take could be the end")
+        GamePrint("every step you take could be the end", 'action')
         
         return tuple(self.pos)
 
@@ -109,7 +109,7 @@ class Entity() :
     # there should also be some other way to interact with the world, maybe different responses for walking into stuff
     def stretch(self) -> tuple:
         pygame.mixer.Sound.play(s_hand)
-        GamePrint("you stretch your hand into the unknown.")
+        GamePrint("you stretch your hand into the unknown.", 'action')
         front : tuple = None
         if self.facing == 'u' :
             front = (self.pos[0], self.pos[1] - 1)

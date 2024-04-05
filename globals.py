@@ -26,33 +26,55 @@ def load_image(path):
     img.set_colorkey((0, 0, 0))
     return img
 
+# https://gamedev.stackexchange.com/questions/26550/how-can-a-pygame-image-be-colored
+# ^^ for coloring the letters ^^
+def color_surface(surface : pygame.Surface, rgb : tuple = None) :
+    arr = pygame.surfarray.pixels3d(surface)
+    arr[:,:,0] = rgb[0]
+    arr[:,:,1] = rgb[1]
+    arr[:,:,2] = rgb[2]
+
 chars = load_image('./letters/alphabet.png')
 alphanumeric = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9', ' ', '.']
 # 40 CHARACTERS FIT IN A LINE BEFORE OVERFLOW
-def TextToImg(text : str) -> list:
-    # given text, we want to turn each character into an integer that can be used to go into the 
-    # sprite sheet and get the corresponding letter to then put it into Sprite()
+def TextToImg(text : str, rgb : tuple = None) -> list:
     utext = text.upper()
     sentence = []
+
     for c in utext :
         index = alphanumeric.index(c)
         sprite_x = index * 4
 
-        subsurf : pygame.Surface = chars.subsurface(pygame.Rect(sprite_x, 0, 4, 4))
-        # sentence.append(Sprite(None, subsurf))
-        sentence.append(subsurf)
+        letter : pygame.Surface = chars.subsurface(pygame.Rect(sprite_x, 0, 4, 4))
+        if rgb != None :
+            letter.convert_alpha()
+            
+            colored_letter = letter.copy()
+            color_surface(colored_letter, rgb)
+            sentence.append(colored_letter)
+        else :
+            sentence.append(letter)
+
 
     return sentence
 
 # TODO : make it print one color for text that describes user action and another color for text that responds to that action
-on_screen_text = [] # should only ever have size five
-def GamePrint(text : str) :
+on_screen_text : list = [] # should only ever have size five
+def GamePrint(text : str, text_type : str = None) :
+    color = None
+    if text_type == 'action' :
+        color = (255, 0, 0)
+    elif text_type == 'response' :
+        color = (0, 255, 0)
+
+    # TODO : could make purple for special item pick ups
+
     if len(text) <= 40 :
-        on_screen_text.append(TextToImg(text))
+        on_screen_text.append(TextToImg(text, color))
     else :
         left = text[0:40]
-        on_screen_text.append(TextToImg(left))
-        on_screen_text.append(TextToImg(text[40:]))
+        on_screen_text.append(TextToImg(left, color))
+        on_screen_text.append(TextToImg(text[40:], color))
 
 # ======== WORLD ========
 

@@ -14,11 +14,17 @@
 # being able to type into the thing as a subversion later in the game would be cool, especially in a scenario where 
 # your normal actions are failing
 # --------------------
+# DESIGN DECISION - we're gonna do the binding of isaac thing where you pick up an item get a cryptic description and the rest is for you to figure out
+# this would likely apply to future items, not our items of seeing right now as it's pretty obvious what those do
+# --------------------
 # You step forward, into a world unknown. 
 # Every step could mean your demise, and yet you press forward, unwavering.
 # TODO: inline overflow
 # TODO: load in multiple screens as a full map - PCG CAN COME IN HERE
 # TODO: powerupsz
+# TODO: RANDOMLY CENSORED TEXT COULD BE INTERESTING for obfuscating info, maybe there's a third eye, one that lets you see the text
+    # actually maybe you start with no third eye, but when you lose your two eyes, you gain this one and the ability to see text
+    # so in that opening "cutscene" i have planned, text would appear blocked out as you walk around- thought about it could
 # there should be a power up to reveal the players location and a 
 # separate one to show the map ( you can only have one at a time)
     # player location one should reveal enemies as well but maybe make them move as a consequence (they'd be static in the dark)
@@ -42,6 +48,8 @@
 # TODO: going to need a separate function to load the kind of file that will get outputted by the save function
 
 # TODO: locked doors between rooms and keys that open them, which implies the need for an inventory
+    # this could imply the need for a UI for that inventory, or maybe just a button to text print what's in your inventory
+
 import pygame
 clock = pygame.time.Clock()
 from pygame.locals import *
@@ -74,6 +82,7 @@ while playing:
 
     new_tile = None
     touched_tile = None
+
     for event in pygame.event.get() :
         if event.type == QUIT:
             pygame.quit()
@@ -100,22 +109,26 @@ while playing:
     # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT
     if new_tile in world[player.curr_room].keys() :
         if world[player.curr_room][new_tile] == 7:
-            GamePrint("The world becomes clearer to you.")
+            GamePrint("You pick")
+            GamePrint("The world becomes clearer to you.", 'response')
+            world[player.curr_room].pop(new_tile)
             render_world = True
             # need to find that item in our world dict and remove it though
-        if world[player.curr_room][new_tile] == 8:
-            GamePrint("You seem to step outside yourself.")
+        elif world[player.curr_room][new_tile] == 8:
+            GamePrint("You seem to step outside yourself.", 'response')
+            world[player.curr_room].pop(new_tile)
             render_player = True
-        if world[player.curr_room][new_tile] == 4:
-            GamePrint("something blocks your path.")
+        elif world[player.curr_room][new_tile] == 4:
+            GamePrint("something blocks your path.", 'response')
 
+    # IF WE STRETCH OUT HAND OUT TRYING TO TOUCH SOMETHING IN THE WORLD
     if touched_tile in world[player.curr_room].keys() :
         if world[player.curr_room][touched_tile] == 4 :
-            GamePrint("the cold indifference of the wall seems to slap you in the face")
+            GamePrint("the cold indifference of the wall seems to slap you in the face", 'response')
     else :
         if touched_tile != None :
             # we have stretched out our hand and found nothing
-            GamePrint("you find nothing...")
+            GamePrint("you find nothing...", 'response')
 
     # game area
     if render_world :
