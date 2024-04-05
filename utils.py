@@ -1,10 +1,5 @@
 from globals import *
-# ======== MISC. ========
 
-# ========  ENTITY CLASS ========
-# ========  ENTITY CLASS ========
-# ========  ENTITY CLASS ========
-# ========  ENTITY CLASS ========
 class Entity() :
     def __init__(self, pos : list) -> None:
         self.pos        : list  = pos
@@ -13,13 +8,9 @@ class Entity() :
         self.curr_room  : str   = '1-0'
         self.inventory  : list  = []
 
-    # return none on success, flag on collision check
-        # NEW (maybe - i think i can flag) : return tuple,
-        # nnvm that doesnt work cuz we're supposed to be removing from the world dict
-        # HOWEVER, MAYBE WE CAN LEAVE IT IN THE WORLD AND JUS USE AN EXTERNAL FLAG TO MARK IT AS INACTIVE
     def move(self, direction : str) -> tuple:
         # TODO : move this into the if blocks so you can play a different sound based on what you actually end up doing
-        pygame.mixer.Sound.play(s_step)
+        # pygame.mixer.Sound.play(s_step)
         self.facing = direction
         original_pos = [self.pos[0], self.pos[1]]
         if direction == 'u' :
@@ -37,6 +28,7 @@ class Entity() :
         # NOTE: in the case of collision, we return the coords of the block we just collided with
         if tuple(self.pos) in world[self.curr_room].keys() :
             if world[self.curr_room][tuple(self.pos)] == 4 :
+                pygame.mixer.Sound.play(s_blocked_step)
                 invalid_pos = [self.pos[0], self.pos[1]]
                 self.pos = original_pos
                 return tuple(invalid_pos)
@@ -48,6 +40,7 @@ class Entity() :
                 GamePrint("only nothingness awaits you there")
                 self.pos = original_pos
                 # NOTE : this return is different from the rest - fine for now but fix later
+                # pygame.mixer.Sound.play(s_step)
                 return -1 # might need to be different since this is the same as a successful step
             else : # just move down normally
                 GamePrint("southbound for some reason")
@@ -102,14 +95,14 @@ class Entity() :
 
         print("new pos", self.pos, " in room, ", self.curr_room)
         GamePrint("every step you take could be the end", 'action')
-        
+        # pygame.mixer.Sound.play(s_step)
         return tuple(self.pos)
 
     # there should be a limit on the number of times you can stretch your hand out
     # there should also be some other way to interact with the world, maybe different responses for walking into stuff
     def stretch(self) -> tuple:
-        pygame.mixer.Sound.play(s_hand)
-        GamePrint("you stretch your hand into the unknown.", 'action')
+        # GamePrint("you stretch your hand into the unknown.", 'action')
+        GamePrint("Im gonna touch you vro...", 'action')
         front : tuple = None
         if self.facing == 'u' :
             front = (self.pos[0], self.pos[1] - 1)

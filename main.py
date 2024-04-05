@@ -21,7 +21,7 @@
 # Every step could mean your demise, and yet you press forward, unwavering.
 # TODO: inline overflow
 # TODO: load in multiple screens as a full map - PCG CAN COME IN HERE
-# TODO: powerupsz
+# TODO: powerupsz + more item ideas in general
 # TODO: RANDOMLY CENSORED TEXT COULD BE INTERESTING for obfuscating info, maybe there's a third eye, one that lets you see the text
     # actually maybe you start with no third eye, but when you lose your two eyes, you gain this one and the ability to see text
     # so in that opening "cutscene" i have planned, text would appear blocked out as you walk around- thought about it could
@@ -49,6 +49,8 @@
 
 # TODO: locked doors between rooms and keys that open them, which implies the need for an inventory
     # this could imply the need for a UI for that inventory, or maybe just a button to text print what's in your inventory
+# TODO : idea: now that we've change the text background to be white, another subversion could be to allow the player
+# to step into the text box at some point in the story
 
 import pygame
 clock = pygame.time.Clock()
@@ -58,6 +60,7 @@ from utils import *
 player = Entity(
     [5, 8] # starting pos at bottom middle of grid
 )
+
 
 eye_coords = generateRandomCoords()
 while eye_coords in world[player.curr_room].keys():
@@ -82,6 +85,7 @@ while playing:
 
     new_tile = None
     touched_tile = None
+    touching = False
 
     for event in pygame.event.get() :
         if event.type == QUIT:
@@ -100,6 +104,7 @@ while playing:
                 new_tile : tuple = player.move('r')
             if event.key == K_SPACE :
                 touched_tile : tuple = player.stretch()
+                touching = True
             if event.key == K_m :
                 render_world = not render_world
             if event.key == K_p :
@@ -109,25 +114,35 @@ while playing:
     # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT
     if new_tile in world[player.curr_room].keys() :
         if world[player.curr_room][new_tile] == 7:
-            GamePrint("You pick")
+            GamePrint("You pick up the orb of shitting.", 'item')
             GamePrint("The world becomes clearer to you.", 'response')
             world[player.curr_room].pop(new_tile)
+            pygame.mixer.Sound.play(s_item)
             render_world = True
             # need to find that item in our world dict and remove it though
         elif world[player.curr_room][new_tile] == 8:
+            GamePrint("You pick up the orb of pissing.", 'item')
             GamePrint("You seem to step outside yourself.", 'response')
             world[player.curr_room].pop(new_tile)
+            pygame.mixer.Sound.play(s_item)
             render_player = True
         elif world[player.curr_room][new_tile] == 4:
+            pygame.mixer.Sound.play(s_blocked_step)
             GamePrint("something blocks your path.", 'response')
+    elif new_tile != None : # took a step into nothing
+        pygame.mixer.Sound.play(s_step)
 
     # IF WE STRETCH OUT HAND OUT TRYING TO TOUCH SOMETHING IN THE WORLD
     if touched_tile in world[player.curr_room].keys() :
+        pygame.mixer.Sound.play(s_touch)
         if world[player.curr_room][touched_tile] == 4 :
-            GamePrint("the cold indifference of the wall seems to slap you in the face", 'response')
+            GamePrint("the cold indifference of the wall seems to slap you in the face.", 'response')
+        elif world[player.curr_room][touched_tile] == 7 :
+            GamePrint("you feel a soft orb.", 'response')
     else :
         if touched_tile != None :
             # we have stretched out our hand and found nothing
+            pygame.mixer.Sound.play(s_hand)
             GamePrint("you find nothing...", 'response')
 
     # game area
@@ -144,9 +159,13 @@ while playing:
     if render_player :
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
+    # TODO : need this to sustain for a bit longer than one frame lmfao
+    if touching :
+        raw_window.blit(grab_sprite, (touched_tile[0] * 16, touched_tile[1] * 16))
     
     # text area =====           
-    pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
+    pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
+    # pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # TEXT RENDERING ==========
     # overflow handling
     if len(on_screen_text) > 5:

@@ -59,13 +59,18 @@ def TextToImg(text : str, rgb : tuple = None) -> list:
     return sentence
 
 # TODO : make it print one color for text that describes user action and another color for text that responds to that action
+# TODO: once colors are picked out more, i think player action text should be the same
+# color as the player and world as the world
+# BUG : repeated print is weird with multi lines, try touching a wall a bunch
 on_screen_text : list = [] # should only ever have size five
 def GamePrint(text : str, text_type : str = None) :
     color = None
     if text_type == 'action' :
         color = (255, 0, 0)
     elif text_type == 'response' :
-        color = (0, 255, 0)
+        color = (0, 212, 255)
+    elif text_type == 'item' :
+        color = (255, 0, 255)
 
     # TODO : could make purple for special item pick ups
 
@@ -124,9 +129,12 @@ def generateRandomCoords() -> tuple :
 world = loadWorld()
 
 s_step          = pygame.mixer.Sound("./sfx/step.wav")
+s_blocked_step  = pygame.mixer.Sound("./sfx/blocked_step.wav")
 s_death         = pygame.mixer.Sound("./sfx/death.wav")
 s_destroy_tile  = pygame.mixer.Sound("./sfx/destroy_tile.wav")
 s_hand          = pygame.mixer.Sound("./sfx/hand.wav")
+s_touch         = pygame.mixer.Sound("./sfx/touch.wav")
+s_item          = pygame.mixer.Sound("./sfx/item.wav")
 
 render_world = True
 render_player = True
@@ -136,7 +144,8 @@ eye_sprite      = load_image('./sprites/eye.png')
 eye2_sprite     = load_image('./sprites/eye2.png')
 grab_sprite_raw = load_image('./sprites/grab.png')
 grab_sprite     = pygame.transform.scale(grab_sprite_raw, (16,16))
-
-# FORMER ENTITY CLASS
+enemy_sprite    = load_image('./sprites/enemy.png')
 
 playing = True
+
+death_counter = 0
