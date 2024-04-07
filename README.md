@@ -16,6 +16,9 @@ but how about a whole adventure game set in the dark
 - maybe the eye could be a switch on a timer instead of a permanent upgrade (or both and it just varies depending on the room - like oops your eyes fell out again)
 - now that we've change the text background to be white, another subversion could be to allow the player to step into the text box at some point in the story
 
+### ITEM IDEAS
+- movement speed item
+
 ## DECISIONS
 
 - we're gonna do the binding of isaac thing where you pick up an item get a cryptic description and the rest is for you to figure out
@@ -26,10 +29,13 @@ but how about a whole adventure game set in the dark
     - seeing the world one should also reveal secrets but AT WHAT COST one of the powerups should also reveal items in the world - should it be world or player revealing one though (im thinking player)
 
     - maybe having the map off will tell you your coords by default
+
 ==================
 ## TODOS
 
 ### SMALL
+- continuous keydown movement
+- make hand animation stay out longer
 - inline overflow in GamePrint() function (i.e. print sentences of more than 40 chars in a single call to the function)
     - obstacles: bug with how it pops existing elements in textbox
 - player health 

@@ -4,22 +4,35 @@ class Entity() :
     def __init__(self, pos : list) -> None:
         self.pos        : list  = pos
         self.facing     : str   = 'u'
+        self.is_walking : bool  = False
         self.health     : int   = 5
         self.curr_room  : str   = '1-0'
         self.inventory  : list  = []
 
-    def move(self, direction : str) -> tuple:
+    # def move(self, direction : str) -> tuple:
+    def move(self) -> tuple:
         # TODO : move this into the if blocks so you can play a different sound based on what you actually end up doing
         # pygame.mixer.Sound.play(s_step)
-        self.facing = direction
+        # self.facing = direction
+        # original_pos = [self.pos[0], self.pos[1]]
+        # if direction == 'u' :
+        #     self.pos[1] -= 1
+        # if direction == 'l' :
+        #     self.pos[0] -= 1
+        # if direction == 'd' :
+        #     self.pos[1] += 1
+        # if direction == 'r' :
+        #     self.pos[0] += 1
+
+        # NEW THING WE'RE TRYING - DIRECTION GETS HANDLED IN THE MAIN LOOP, THIS IS JUST IN CHARGE OF MOVING IT
         original_pos = [self.pos[0], self.pos[1]]
-        if direction == 'u' :
+        if self.facing == 'u' :
             self.pos[1] -= 1
-        if direction == 'l' :
+        if self.facing == 'l' :
             self.pos[0] -= 1
-        if direction == 'd' :
+        if self.facing == 'd' :
             self.pos[1] += 1
-        if direction == 'r' :
+        if self.facing == 'r' :
             self.pos[0] += 1
 
         # self.pos ends up (temporarily) being the new pos, until it gets error corrected if needed

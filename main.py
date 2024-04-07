@@ -9,16 +9,18 @@ player = Entity(
 
 
 eye_coords = generateRandomCoords()
-while eye_coords in world[player.curr_room].keys():
+while eye_coords in world['2-0'].keys():
     eye_coords = generateRandomCoords()
 # place the eye inside our actual data representation of the world
-world[player.curr_room][eye_coords] = 7
+world['2-0'][eye_coords] = 7
+# world[player.curr_room][eye_coords] = 7
 
     
 eye2_coords = generateRandomCoords()
-while eye2_coords in world[player.curr_room].keys():
+while eye2_coords in world['2-0'].keys():
     eye2_coords = generateRandomCoords()
-world[player.curr_room][eye2_coords] = 8
+world['2-0'][eye2_coords] = 8
+# world[player.curr_room][eye2_coords] = 8
 
 frame_start = 0
 frame_end = pygame.time.get_ticks()
@@ -41,13 +43,25 @@ while playing:
             if event.key == K_ESCAPE:
                 playing = False
             if event.key == K_w:
-                new_tile : tuple = player.move('u')
+                player.facing = 'u'
+                player.is_walking = True
+                walk_frame_counter += 12
+                # new_tile : tuple = player.move('u')
             if event.key == K_a:
-                new_tile : tuple = player.move('l')
+                player.facing = 'l'
+                player.is_walking = True
+                walk_frame_counter += 12
+                # new_tile : tuple = player.move('l')
             if event.key == K_s:
-                new_tile : tuple = player.move('d')
+                player.facing = 'd'
+                player.is_walking = True
+                walk_frame_counter += 12
+                # new_tile : tuple = player.move('d')
             if event.key == K_d:
-                new_tile : tuple = player.move('r')
+                player.facing = 'r'
+                player.is_walking = True
+                walk_frame_counter += 12
+                # new_tile : tuple = player.move('r')
             if event.key == K_SPACE :
                 touched_tile : tuple = player.stretch()
                 touching = True
@@ -55,9 +69,28 @@ while playing:
                 render_world = not render_world
             if event.key == K_p :
                 render_player = not render_player
-            print(new_tile)
+            # print(new_tile)
 
-    # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT
+        elif event.type == KEYUP : 
+            if event.key == K_w and player.facing == 'u':
+                player.is_walking = False
+            if event.key == K_a and player.facing == 'l':
+                player.is_walking = False
+            if event.key == K_s and player.facing == 'd':
+                player.is_walking = False
+            if event.key == K_d and player.facing == 'r':
+                player.is_walking = False
+
+    
+    if player.is_walking :
+        # let's arbitrarily say that if we're walking, we're allowed to take a step every 16 frames
+        if walk_frame_counter % 12 == 0 :
+            new_tile = player.move()
+            print(new_tile)
+        
+        walk_frame_counter += 1
+
+    # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT, THIS HANDLES THE WORLD'S RESPONSE
     if new_tile in world[player.curr_room].keys() :
         if world[player.curr_room][new_tile] == 7:
             GamePrint("You pick up the orb of shitting.", 'item')
