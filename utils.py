@@ -5,6 +5,8 @@ class Entity() :
         self.pos        : list  = pos
         self.facing     : str   = 'u'
         self.is_walking : bool  = False
+        self.is_touching: bool  = False
+        self.touched_tile       = None
         self.health     : int   = 5
         self.curr_room  : str   = '1-0'
         self.inventory  : list  = []
@@ -126,4 +128,20 @@ class Entity() :
         if self.facing == 'r' :
             front = (self.pos[0] + 1, self.pos[1])
             
+        self.touched_tile = front
+        self.is_touching = True
+
+        if self.touched_tile in world[self.curr_room].keys() :
+            pygame.mixer.Sound.play(s_touch)
+            if world[self.curr_room][self.touched_tile] == 4 :
+                GamePrint("the cold indifference of the wall seems", 'response')
+                GamePrint("to slap you in the face.", 'response')
+            elif world[self.curr_room][self.touched_tile] == 7 :
+                GamePrint("you feel a soft orb.", 'response')
+        else :
+            if self.touched_tile != None :
+                # we have stretched out our hand and found nothing
+                pygame.mixer.Sound.play(s_hand)
+                GamePrint("you find nothing...", 'response')
+        
         return front

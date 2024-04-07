@@ -32,14 +32,17 @@ while playing:
     raw_window.fill((0,0,0))
 
     new_tile = None
-    touched_tile = None
+    # touched_tile = None
     touching = False
 
     for event in pygame.event.get() :
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+        # NOTE : adding 12 on keydown makes the first step instant and we add to it 
+        # from there to make subsequent steps take longer
         if event.type == KEYDOWN : 
+            print("KD")
             if event.key == K_ESCAPE:
                 playing = False
             if event.key == K_w:
@@ -63,8 +66,9 @@ while playing:
                 walk_frame_counter += 12
                 # new_tile : tuple = player.move('r')
             if event.key == K_SPACE :
-                touched_tile : tuple = player.stretch()
-                touching = True
+                touch_frame_counter = 0
+                # touched_tile : tuple = player.stretch()
+                player.stretch()
             if event.key == K_m :
                 render_world = not render_world
             if event.key == K_p :
@@ -74,12 +78,16 @@ while playing:
         elif event.type == KEYUP : 
             if event.key == K_w and player.facing == 'u':
                 player.is_walking = False
+                walk_frame_counter = 0
             if event.key == K_a and player.facing == 'l':
                 player.is_walking = False
+                walk_frame_counter = 0
             if event.key == K_s and player.facing == 'd':
                 player.is_walking = False
+                walk_frame_counter = 0
             if event.key == K_d and player.facing == 'r':
                 player.is_walking = False
+                walk_frame_counter = 0
 
     
     if player.is_walking :
@@ -111,19 +119,20 @@ while playing:
     elif new_tile != None : # took a step into nothing
         pygame.mixer.Sound.play(s_step)
 
+
     # IF WE STRETCH OUT HAND OUT TRYING TO TOUCH SOMETHING IN THE WORLD
-    if touched_tile in world[player.curr_room].keys() :
-        pygame.mixer.Sound.play(s_touch)
-        if world[player.curr_room][touched_tile] == 4 :
-            GamePrint("the cold indifference of the wall seems", 'response')
-            GamePrint("to slap you in the face.", 'response')
-        elif world[player.curr_room][touched_tile] == 7 :
-            GamePrint("you feel a soft orb.", 'response')
-    else :
-        if touched_tile != None :
-            # we have stretched out our hand and found nothing
-            pygame.mixer.Sound.play(s_hand)
-            GamePrint("you find nothing...", 'response')
+    # if player.touched_tile in world[player.curr_room].keys() :
+    #     pygame.mixer.Sound.play(s_touch)
+    #     if world[player.curr_room][player.touched_tile] == 4 :
+    #         GamePrint("the cold indifference of the wall seems", 'response')
+    #         GamePrint("to slap you in the face.", 'response')
+    #     elif world[player.curr_room][player.touched_tile] == 7 :
+    #         GamePrint("you feel a soft orb.", 'response')
+    # else :
+    #     if player.touched_tile != None :
+    #         # we have stretched out our hand and found nothing
+    #         pygame.mixer.Sound.play(s_hand)
+    #         GamePrint("you find nothing...", 'response')
 
     # game area
     if render_world :
@@ -140,19 +149,21 @@ while playing:
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
     # TODO : need this to sustain for a bit longer than one frame lmfao
-    if touching :
-        raw_window.blit(grab_sprite, (touched_tile[0] * 16, touched_tile[1] * 16))
+    if player.is_touching and touch_frame_counter < 4:
+        raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
+        touch_frame_counter += 1
+    else : 
+        touch_frame_counter = 0
+        player.is_touching = False
+        player.touched_tile = None
+    # if touching :
+    #     raw_window.blit(grab_sprite, (touched_tile[0] * 16, touched_tile[1] * 16))
     
     # text area =====           
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # TEXT RENDERING ==========
-    # # overflow handling
-    # if len(on_screen_text) > 5:
-    #     excess = len(on_screen_text) - 5
-    #     for i in range(excess):
-    #         on_screen_text.pop(i)
-
+    
     line_num = 0
     for s in on_screen_text :
         num = 0
@@ -165,7 +176,6 @@ while playing:
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())
     display_window.blit(scaled_window, (0,0))
     pygame.display.update()
-
     # ==============================
     frame_end = pygame.time.get_ticks()
     dt = frame_end - frame_start
