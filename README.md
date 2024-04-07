@@ -1,9 +1,7 @@
-==================
 # FEAR OF THE DARK
-this started as an idea about explorin just my room in the dark to find and item
+
+This started as an idea about explorin just my room in the dark to find and item
 but how about a whole adventure game set in the dark
-==================
-SFXR - LOOK INTO GENERATING SOUND EFFECTS MAYBE!!!!!
 ==================
 ## IDEAS
 - Dungeon starts out as a normal thing, you can see everything and navigate normally then, into one of the 2-1 room, a scripted death. your eyes have fallen out of your sockets (by an enemy? or just some malignant force of the dungeon)
@@ -38,6 +36,7 @@ SFXR - LOOK INTO GENERATING SOUND EFFECTS MAYBE!!!!!
 - player inventory
     - this is a prerequisite for having locked doors between certain rooms (and keys that open them of course)
 - inventory UI - I think i'd prefer to have an inventory button that just tells you what you have on you at the moment (might have to be max 5 because of line cap lmfao)
+- make different sound effects for different movement directions
 
 ### LARGE
 - load in multiple screens as a full map
@@ -46,6 +45,7 @@ SFXR - LOOK INTO GENERATING SOUND EFFECTS MAYBE!!!!!
     - in adding more we need to also think about how theyd work with/without each of the eyes
 - pause menu
 - going to need a separate function to load the kind of file that will get outputted by the save function
+- SFXR - LOOK INTO GENERATING SOUND EFFECTS MAYBE!!!!!
  
 ### BACKBURNER PROBLEMS
 - locating yourself when you lose track of where you are WITHOUT reading coords
