@@ -136,7 +136,8 @@ while playing:
     if touched_tile in world[player.curr_room].keys() :
         pygame.mixer.Sound.play(s_touch)
         if world[player.curr_room][touched_tile] == 4 :
-            GamePrint("the cold indifference of the wall seems to slap you in the face.", 'response')
+            GamePrint("the cold indifference of the wall seems", 'response')
+            GamePrint("to slap you in the face.", 'response')
         elif world[player.curr_room][touched_tile] == 7 :
             GamePrint("you feel a soft orb.", 'response')
     else :
@@ -167,11 +168,11 @@ while playing:
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # TEXT RENDERING ==========
-    # overflow handling
-    if len(on_screen_text) > 5:
-        excess = len(on_screen_text) - 5
-        for i in range(excess):
-            on_screen_text.pop(i)
+    # # overflow handling
+    # if len(on_screen_text) > 5:
+    #     excess = len(on_screen_text) - 5
+    #     for i in range(excess):
+    #         on_screen_text.pop(i)
 
     line_num = 0
     for s in on_screen_text :
@@ -181,12 +182,12 @@ while playing:
             num += 1
         line_num += 1
 
-    # ========
+    # ==============================
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())
     display_window.blit(scaled_window, (0,0))
     pygame.display.update()
 
-    # ========
+    # ==============================
     frame_end = pygame.time.get_ticks()
     dt = frame_end - frame_start
     clock.tick(60)

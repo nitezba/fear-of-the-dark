@@ -62,6 +62,7 @@ def TextToImg(text : str, rgb : tuple = None) -> list:
 # TODO: once colors are picked out more, i think player action text should be the same
 # color as the player and world as the world
 # BUG : repeated print is weird with multi lines, try touching a wall a bunch
+    # THIS IS BECAUSE OF REPEATED CALLS TO GAMEEPRINT
 on_screen_text : list = [] # should only ever have size five
 def GamePrint(text : str, text_type : str = None) :
     color = None
@@ -72,14 +73,30 @@ def GamePrint(text : str, text_type : str = None) :
     elif text_type == 'item' :
         color = (255, 0, 255)
 
-    # TODO : could make purple for special item pick ups
-
     if len(text) <= 40 :
         on_screen_text.append(TextToImg(text, color))
+        if len(on_screen_text) > 5:
+            on_screen_text.pop(0)
     else :
         left = text[0:40]
         on_screen_text.append(TextToImg(left, color))
         on_screen_text.append(TextToImg(text[40:], color))
+        if len(on_screen_text) == 6:
+            on_screen_text.pop(0)
+        elif len(on_screen_text) == 7:
+            print("len 8")
+            on_screen_text.pop(0)
+            on_screen_text.pop(1)
+        elif len(on_screen_text) == 8:
+            on_screen_text.pop(0)
+            on_screen_text.pop(1)
+            on_screen_text.pop(2)
+
+    # overflow handling
+    # if len(on_screen_text) > 5:
+    #     excess = len(on_screen_text) - 5
+    #     for i in range(excess):
+    #         on_screen_text.pop(i)
 
 # ======== WORLD ========
 
