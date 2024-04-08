@@ -34,7 +34,6 @@ but how about a whole adventure game set in the dark
 ## TODOS
 
 ### SMALL
-- make hand animation stay out longer
 - inline overflow in GamePrint() function (i.e. print sentences of more than 40 chars in a single call to the function)
     - obstacles: bug with how it pops existing elements in textbox
 - player health 
@@ -57,3 +56,4 @@ but how about a whole adventure game set in the dark
 
 ### DONE
 - continuous keydown movement
+- make hand animation stay out longer

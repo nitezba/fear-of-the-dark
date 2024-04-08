@@ -155,6 +155,7 @@ s_item          = pygame.mixer.Sound("./sfx/item.wav")
 
 render_world = True
 render_player = True
+render_text = True
 tile_sprite     = load_image('./sprites/tile.png')
 player_sprite   = load_image('./sprites/player.png')
 eye_sprite      = load_image('./sprites/eye.png')

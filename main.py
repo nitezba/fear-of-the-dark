@@ -7,6 +7,10 @@ player = Entity(
     [5, 8] # starting pos at bottom middle of grid
 )
 
+borg = Enemy(
+    [1,1]
+)
+borg.curr_room = '2-0'
 
 eye_coords = generateRandomCoords()
 while eye_coords in world['2-0'].keys():
@@ -73,6 +77,8 @@ while playing:
                 render_world = not render_world
             if event.key == K_p :
                 render_player = not render_player
+            if event.key == K_t :
+                render_text = not render_text
             # print(new_tile)
 
         elif event.type == KEYUP : 
@@ -88,7 +94,6 @@ while playing:
             if event.key == K_d and player.facing == 'r':
                 player.is_walking = False
                 walk_frame_counter = 0
-
     
     if player.is_walking :
         # let's arbitrarily say that if we're walking, we're allowed to take a step every 16 frames
@@ -119,21 +124,6 @@ while playing:
     elif new_tile != None : # took a step into nothing
         pygame.mixer.Sound.play(s_step)
 
-
-    # IF WE STRETCH OUT HAND OUT TRYING TO TOUCH SOMETHING IN THE WORLD
-    # if player.touched_tile in world[player.curr_room].keys() :
-    #     pygame.mixer.Sound.play(s_touch)
-    #     if world[player.curr_room][player.touched_tile] == 4 :
-    #         GamePrint("the cold indifference of the wall seems", 'response')
-    #         GamePrint("to slap you in the face.", 'response')
-    #     elif world[player.curr_room][player.touched_tile] == 7 :
-    #         GamePrint("you feel a soft orb.", 'response')
-    # else :
-    #     if player.touched_tile != None :
-    #         # we have stretched out our hand and found nothing
-    #         pygame.mixer.Sound.play(s_hand)
-    #         GamePrint("you find nothing...", 'response')
-
     # game area
     if render_world :
         for tile_coord in world[player.curr_room].keys() :
@@ -144,16 +134,17 @@ while playing:
             if world[player.curr_room][tile_coord] == 8 :
                 raw_window.blit(eye2_sprite, (eye2_coords[0] * 16, eye2_coords[1] * 16))
 
-
     if render_player :
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
-    # TODO : need this to sustain for a bit longer than one frame lmfao
-    if player.is_touching and touch_frame_counter < 4:
+    if player.curr_room == borg.curr_room :
+        borg.move_to((8,1))
+        raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
+
+    if player.is_touching and touch_frame_counter < 6:
         raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
         touch_frame_counter += 1
     else : 
-        touch_frame_counter = 0
         player.is_touching = False
         player.touched_tile = None
     # if touching :
@@ -167,10 +158,11 @@ while playing:
     line_num = 0
     for s in on_screen_text :
         num = 0
-        for sprite in s:
-            raw_window.blit(sprite, pygame.Rect(num * 4, 145 + (6 * line_num), 4, 4))
-            num += 1
-        line_num += 1
+        if render_text :
+            for sprite in s:
+                raw_window.blit(sprite, pygame.Rect(num * 4, 145 + (6 * line_num), 4, 4))
+                num += 1
+            line_num += 1
 
     # ==============================
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())

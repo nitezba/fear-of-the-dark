@@ -109,7 +109,7 @@ class Entity() :
 
 
         print("new pos", self.pos, " in room, ", self.curr_room)
-        GamePrint("every step you take could be the end", 'action')
+        GamePrint("every new step you take could be the end", 'action')
         # pygame.mixer.Sound.play(s_step)
         return tuple(self.pos)
 
@@ -118,6 +118,7 @@ class Entity() :
     def stretch(self) -> tuple:
         # GamePrint("you stretch your hand into the unknown.", 'action')
         GamePrint("Im gonna touch you vro...", 'action')
+        touch_frame_counter = 0
         front : tuple = None
         if self.facing == 'u' :
             front = (self.pos[0], self.pos[1] - 1)
@@ -131,6 +132,9 @@ class Entity() :
         self.touched_tile = front
         self.is_touching = True
 
+        # NOTE : this was moved out of the main game loop so that the actual checking/response of
+        # what was touched only happens on one frame, while still allowing us to keep the 
+        # sprite displayed for multiple fraims
         if self.touched_tile in world[self.curr_room].keys() :
             pygame.mixer.Sound.play(s_touch)
             if world[self.curr_room][self.touched_tile] == 4 :
@@ -145,3 +149,54 @@ class Entity() :
                 GamePrint("you find nothing...", 'response')
         
         return front
+
+class Enemy() :
+    def __init__(self, pos : list) -> None:
+        self.pos        : list  = pos
+        self.facing     : str   = 'u'
+        self.health     : int   = 5
+        self.curr_room  : str   = '1-0'
+        self.frame_counter : int= 0
+
+    # take a SINGLE STEP in target destination
+    def move_to(self, dest : tuple) -> bool :
+        if tuple(self.pos) == dest :
+            return True
+        
+        if self.frame_counter == 0:
+            self.frame_counter += 6
+
+        distance_x = self.pos[0] - dest[0] 
+        distance_y = self.pos[1] - dest[1]
+        
+        new_pos = None
+
+        # TODO : COLLISION HANDLING
+
+        # x dir is further
+        if abs(distance_x) > abs(distance_y) :
+            # check if we need to move left or right
+            if distance_x > 0 : # need to move left
+                new_pos = [self.pos[0] - 1, self.pos[1]]
+            else : # need to move right
+                new_pos = [self.pos[0] + 1, self.pos[1]]
+        else :
+            if distance_y > 0 : # need to move left
+                new_pos = [self.pos[0], self.pos[1] - 1]
+            else : # need to move right
+                new_pos = [self.pos[0], self.pos[1] + 1]
+            # check if we need to move up or down
+        
+        # every twelveth frame it will be allowed to take a step
+        if self.frame_counter % 6 == 0:
+            self.pos = new_pos
+            # while new_pos == None :
+            #     pass
+
+        self.frame_counter += 1
+
+        # return true on dest reached
+        if new_pos == dest :
+            self.frame_counter = 0
+            return True
+        return False
