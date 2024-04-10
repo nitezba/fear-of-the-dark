@@ -1,5 +1,23 @@
 from globals import *
 
+class Timer() :
+    def __init__(self) -> None:
+        self.text_timer = 0
+
+def playCutscene(timer : Timer) :
+    if timer.text_timer == 64 * 0 :
+        GamePrint("You have suffered an untimely death.")
+    elif timer.text_timer == 64 * 1:
+        GamePrint("Time passes.")
+    elif timer.text_timer == 64 * 2 :
+        GamePrint("You wake up but cannot see anything.")
+    elif timer.text_timer == 64 * 3 :
+        GamePrint("Yet somehow this text speaks to you.")
+    elif timer.text_timer == 64 * 4 :
+        return
+
+    if timer.text_timer != 64 * 4 :
+        timer.text_timer += 1
 class Entity() :
     def __init__(self, pos : list) -> None:
         self.pos        : list  = pos
@@ -14,18 +32,7 @@ class Entity() :
     # def move(self, direction : str) -> tuple:
     def move(self) -> tuple:
         # TODO : move this into the if blocks so you can play a different sound based on what you actually end up doing
-        # pygame.mixer.Sound.play(s_step)
-        # self.facing = direction
-        # original_pos = [self.pos[0], self.pos[1]]
-        # if direction == 'u' :
-        #     self.pos[1] -= 1
-        # if direction == 'l' :
-        #     self.pos[0] -= 1
-        # if direction == 'd' :
-        #     self.pos[1] += 1
-        # if direction == 'r' :
-        #     self.pos[0] += 1
-
+        
         # NEW THING WE'RE TRYING - DIRECTION GETS HANDLED IN THE MAIN LOOP, THIS IS JUST IN CHARGE OF MOVING IT
         original_pos = [self.pos[0], self.pos[1]]
         if self.facing == 'u' :
@@ -161,10 +168,10 @@ class Enemy() :
 
     # should only get called upon destination reach
     def flip_dest(self) -> None :
-        if self.dest == (8,1) :
-            self.dest = (1,1)
-        elif self.dest == (1,1) :
-            self.dest = (8,1)
+        if self.dest == (5,1) :
+            self.dest = (4,1)
+        elif self.dest == (4,1) :
+            self.dest = (5,1)
 
     # take a SINGLE STEP in target destination
     def move_to_dest(self) -> bool :

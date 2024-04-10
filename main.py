@@ -11,7 +11,9 @@ borg = Enemy(
     [1,1]
 )
 borg.curr_room = '2-0'
-borg.dest = (8,1)
+borg.dest = (5,1)
+
+timer = Timer()
 
 eye_coords = generateRandomCoords()
 while eye_coords in world['2-0'].keys():
@@ -39,6 +41,9 @@ while playing:
     new_tile = None
     # touched_tile = None
     touching = False
+
+    if death_counter == 1: 
+        playCutscene(timer)
 
     for event in pygame.event.get() :
         if event.type == QUIT:
@@ -138,11 +143,14 @@ while playing:
     if render_player :
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
+    # if in the same room as an (the) enemy
     if player.curr_room == borg.curr_room :
-        print("going to", borg.dest)
         if borg.move_to_dest() :
             borg.flip_dest()
-            print("new dest", borg.dest)
+        
+        if player.pos == borg.pos : 
+            render_player = False
+            death_counter = 1
         raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
     if player.is_touching and touch_frame_counter < 6:
