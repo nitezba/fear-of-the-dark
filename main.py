@@ -11,6 +11,7 @@ borg = Enemy(
     [1,1]
 )
 borg.curr_room = '2-0'
+borg.dest = (8,1)
 
 eye_coords = generateRandomCoords()
 while eye_coords in world['2-0'].keys():
@@ -138,7 +139,10 @@ while playing:
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
     if player.curr_room == borg.curr_room :
-        borg.move_to((8,1))
+        print("going to", borg.dest)
+        if borg.move_to_dest() :
+            borg.flip_dest()
+            print("new dest", borg.dest)
         raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
     if player.is_touching and touch_frame_counter < 6:

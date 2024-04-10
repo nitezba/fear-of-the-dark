@@ -157,17 +157,26 @@ class Enemy() :
         self.health     : int   = 5
         self.curr_room  : str   = '1-0'
         self.frame_counter : int= 0
+        self.dest       : tuple = None
+
+    # should only get called upon destination reach
+    def flip_dest(self) -> None :
+        if self.dest == (8,1) :
+            self.dest = (1,1)
+        elif self.dest == (1,1) :
+            self.dest = (8,1)
 
     # take a SINGLE STEP in target destination
-    def move_to(self, dest : tuple) -> bool :
-        if tuple(self.pos) == dest :
+    def move_to_dest(self) -> bool :
+        if tuple(self.pos) == self.dest :
+            print("ARRIVED")
             return True
         
         if self.frame_counter == 0:
             self.frame_counter += 6
 
-        distance_x = self.pos[0] - dest[0] 
-        distance_y = self.pos[1] - dest[1]
+        distance_x = self.pos[0] - self.dest[0] 
+        distance_y = self.pos[1] - self.dest[1]
         
         new_pos = None
 
@@ -188,7 +197,7 @@ class Enemy() :
             # check if we need to move up or down
         
         # every twelveth frame it will be allowed to take a step
-        if self.frame_counter % 6 == 0:
+        if self.frame_counter % 10 == 0:
             self.pos = new_pos
             # while new_pos == None :
             #     pass
@@ -196,7 +205,7 @@ class Enemy() :
         self.frame_counter += 1
 
         # return true on dest reached
-        if new_pos == dest :
+        if new_pos == self.dest :
             self.frame_counter = 0
             return True
         return False
