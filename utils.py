@@ -2,11 +2,14 @@ from globals import *
 
 # ============================================================
 
-class Timer() :
+# will use for frame counting stuff
+class FrameCounter() :
     def __init__(self) -> None:
         self.text_timer = 0
+        self.walking = 0
+        self.touching = 0
 
-def playCutscene(timer : Timer) :
+def playCutscene(timer : FrameCounter) :
     if timer.text_timer == 64 * 0 :
         GamePrint("You have suffered an untimely death.")
     elif timer.text_timer == 64 * 1:

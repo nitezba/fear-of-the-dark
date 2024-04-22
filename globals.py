@@ -203,9 +203,5 @@ enemy_sprite    = load_image('./sprites/enemy.png')
 
 playing = True
 
-# could be made into a member variable of player alteratively
-walk_frame_counter = 0
-touch_frame_counter = 0
-
 death_counter = 0
 

@@ -13,7 +13,7 @@ borg = Enemy(
 borg.curr_room = '2-0'
 borg.dest = (5,1)
 
-timer = Timer()
+frame_counter = FrameCounter()
 
 frame_start = 0
 frame_end = pygame.time.get_ticks()
@@ -28,7 +28,7 @@ while playing:
     touching = False
 
     if death_counter == 1: 
-        playCutscene(timer)
+        playCutscene(frame_counter)
 
     for event in pygame.event.get() :
         if event.type == QUIT:
@@ -44,23 +44,21 @@ while playing:
                 if event.key == K_w:
                     player.facing = 'u'
                     player.is_walking = True
-                    walk_frame_counter += 12
-                    # new_tile : tuple = player.move('u')
+                    frame_counter.walking += 12
                 if event.key == K_a:
                     player.facing = 'l'
                     player.is_walking = True
-                    walk_frame_counter += 12
-                    # new_tile : tuple = player.move('l')
+                    frame_counter.walking += 12
                 if event.key == K_s:
                     player.facing = 'd'
                     player.is_walking = True
-                    walk_frame_counter += 12
+                    frame_counter.walking += 12
                 if event.key == K_d:
                     player.facing = 'r'
                     player.is_walking = True
-                    walk_frame_counter += 12
+                    frame_counter.walking += 12
             if event.key == K_SPACE :
-                touch_frame_counter = 0
+                frame_counter.touching = 0
                 player.stretch()
             if event.key == K_m :
                 render_world = not render_world
@@ -72,24 +70,24 @@ while playing:
         elif event.type == KEYUP : 
             if event.key == K_w and player.facing == 'u':
                 player.is_walking = False
-                walk_frame_counter = 0
+                frame_counter.walking = 0
             if event.key == K_a and player.facing == 'l':
                 player.is_walking = False
-                walk_frame_counter = 0
+                frame_counter.walking = 0
             if event.key == K_s and player.facing == 'd':
                 player.is_walking = False
-                walk_frame_counter = 0
+                frame_counter.walking = 0
             if event.key == K_d and player.facing == 'r':
                 player.is_walking = False
-                walk_frame_counter = 0
+                frame_counter.walking = 0
     
     if player.is_walking :
         # let's arbitrarily say that if we're walking, we're allowed to take a step every 16 (12 i guess) frames
-        if walk_frame_counter % 12 == 0 :
+        if frame_counter.walking % 12 == 0 :
             new_tile = player.move()
             print(new_tile)
         
-        walk_frame_counter += 1
+        frame_counter.walking += 1
 
     # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT, THIS HANDLES THE WORLD'S RESPONSE
     # we check the new_tile so that we can still respond specifically to the cases
@@ -149,9 +147,9 @@ while playing:
         raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
     # outstretched hand action
-    if player.is_touching and touch_frame_counter < 6:
+    if player.is_touching and frame_counter.touching < 6:
         raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
-        touch_frame_counter += 1
+        frame_counter.touching += 1
     else : 
         player.is_touching = False
         player.touched_tile = None
