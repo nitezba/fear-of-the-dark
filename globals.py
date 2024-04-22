@@ -100,28 +100,62 @@ def GamePrint(text : str, text_type : str = None) :
 
 # ======== WORLD ========
 
-# take json in directory and put it into a dict
-def loadRoom(filename : str) -> dict:
-    file = open(filename)
-    data = json.load(file)
-    world = {ast.literal_eval(k):v for (k,v) in data.items()}
-    return world
+# ============================================================
 
-def loadWorld() -> dict:
-    # looks specifically for json files of the name "r1+1"
-    world_dict = {}
-    files = glob.glob("./map/r*.json")
-    print(files)
-    for filename in files:
-        room : dict = loadRoom(filename)
-        # this scans for the exact room "coords" for this specific storage method
-        room_number : str = filename[7:10]
-        world_dict[room_number] = room
+class World() :
+    def __init__(self) -> None:
+        self.world_data     : dict = {}
+        # idk if this makes things easier or not but at the moment it makes sense
+        # to keep a separate list of item names and their respective coords in a dict
+        # actually i think it makes more sense if the key is the items unique integer and
+        # the value is the sprite itself?
+        self.items          : dict = {}
 
-    # return a dict of dict - outerkeys will be room index, inner dict will be specific room data
-    return world_dict
+    def getRoomData(self, room : str) -> dict :
+        return self.world_data[room]
+
+    def removeItem(self, room : str ,tile : tuple) -> None :
+        self.world_data[room].pop(tile)
+
+    # loads an individual room from json
+    def loadRoom(self, filename : str) -> dict :
+        file = open(filename)
+        data = json.load(file)
+        world = {ast.literal_eval(k):v for (k,v) in data.items()}
+        return world
+    
+    # loads every room file from a directory
+    def loadWorld(self) -> None:
+        # looks specifically for json files of the name "r1+1"
+        world_dict = {}
+        files = glob.glob("./map/r*.json")
+        print(files)
+        for filename in files:
+            room : dict = self.loadRoom(filename)
+            # this scans for the exact room "coords" for this specific storage method
+            room_number : str = filename[7:10]
+            world_dict[room_number] = room
+
+        # return a dict of dict - outerkeys will be room index, inner dict will be specific room data
+        # return world_dict
+        self.world_data = world_dict
+
+    def spawnItems(self) -> None :
+        eye_coords = generateRandomCoords()
+        while eye_coords in self.world_data['2-0'].keys():
+            eye_coords = generateRandomCoords()
+        # place the eye inside our actual data representation of the world
+        self.world_data['2-0'][eye_coords] = 7
+        self.items['eye 1'] = eye_coords
+
+        eye2_coords = generateRandomCoords()
+        while eye2_coords in self.world_data['2-0'].keys():
+            eye2_coords = generateRandomCoords()
+        self.world_data['2-0'][eye2_coords] = 8
+        self.items['eye 2'] = eye2_coords
 
 
+# TODO - move this into the class
 def saveWorld(world : dict) -> None :
     save_dict = {}
     for room in world.keys() :
@@ -132,8 +166,7 @@ def saveWorld(world : dict) -> None :
 
     with open("world_save.json", "w") as outfile :
         json.dump(save_dict, outfile) 
-
-# TODO: going to need a separate function to load the kind of file that will get outputted by the save function
+    # TODO: going to need a separate function to load the kind of file that will get outputted by the save function
 
 # need ints between 1 and 8 (inclusive) for x and 1 and 7 for y
 def generateRandomCoords() -> tuple :
@@ -142,8 +175,11 @@ def generateRandomCoords() -> tuple :
 
     return (x,y)
 
+
 # "GLOBAL" DATA DECLARATION
-world = loadWorld()
+world = World()
+world.loadWorld()
+# world.spawnItems()
 
 s_step          = pygame.mixer.Sound("./sfx/step.wav")
 s_blocked_step  = pygame.mixer.Sound("./sfx/blocked_step.wav")
@@ -153,9 +189,10 @@ s_hand          = pygame.mixer.Sound("./sfx/hand.wav")
 s_touch         = pygame.mixer.Sound("./sfx/touch.wav")
 s_item          = pygame.mixer.Sound("./sfx/item.wav")
 
-render_world = True
-render_player = True
-render_text = True
+render_world    = True
+render_player   = True
+render_text     = False
+
 tile_sprite     = load_image('./sprites/tile.png')
 player_sprite   = load_image('./sprites/player.png')
 eye_sprite      = load_image('./sprites/eye.png')
@@ -171,3 +208,4 @@ walk_frame_counter = 0
 touch_frame_counter = 0
 
 death_counter = 0
+

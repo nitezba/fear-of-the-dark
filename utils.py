@@ -1,5 +1,7 @@
 from globals import *
 
+# ============================================================
+
 class Timer() :
     def __init__(self) -> None:
         self.text_timer = 0
@@ -18,6 +20,8 @@ def playCutscene(timer : Timer) :
 
     if timer.text_timer != 64 * 4 :
         timer.text_timer += 1
+# ============================================================
+
 class Entity() :
     def __init__(self, pos : list) -> None:
         self.pos        : list  = pos
@@ -25,8 +29,10 @@ class Entity() :
         self.is_walking : bool  = False
         self.is_touching: bool  = False
         self.touched_tile       = None
-        self.health     : int   = 5
         self.curr_room  : str   = '1-0'
+        self.can_walk   : bool  = True
+        # unused so far
+        self.health     : int   = 5
         self.inventory  : list  = []
 
     # def move(self, direction : str) -> tuple:
@@ -46,10 +52,12 @@ class Entity() :
 
         # self.pos ends up (temporarily) being the new pos, until it gets error corrected if needed
 
+        curr_room : dict = world.getRoomData(self.curr_room)
+
         # world collision handling
         # NOTE: in the case of collision, we return the coords of the block we just collided with
-        if tuple(self.pos) in world[self.curr_room].keys() :
-            if world[self.curr_room][tuple(self.pos)] == 4 :
+        if tuple(self.pos) in curr_room.keys() :
+            if curr_room[tuple(self.pos)] == 4 :
                 pygame.mixer.Sound.play(s_blocked_step)
                 invalid_pos = [self.pos[0], self.pos[1]]
                 self.pos = original_pos
@@ -125,7 +133,6 @@ class Entity() :
     def stretch(self) -> tuple:
         # GamePrint("you stretch your hand into the unknown.", 'action')
         GamePrint("Im gonna touch you vro...", 'action')
-        touch_frame_counter = 0
         front : tuple = None
         if self.facing == 'u' :
             front = (self.pos[0], self.pos[1] - 1)
@@ -139,15 +146,17 @@ class Entity() :
         self.touched_tile = front
         self.is_touching = True
 
+        curr_room : dict = world.getRoomData(self.curr_room)
+
         # NOTE : this was moved out of the main game loop so that the actual checking/response of
         # what was touched only happens on one frame, while still allowing us to keep the 
         # sprite displayed for multiple fraims
-        if self.touched_tile in world[self.curr_room].keys() :
+        if self.touched_tile in curr_room.keys() :
             pygame.mixer.Sound.play(s_touch)
-            if world[self.curr_room][self.touched_tile] == 4 :
+            if curr_room[self.touched_tile] == 4 :
                 GamePrint("the cold indifference of the wall seems", 'response')
                 GamePrint("to slap you in the face.", 'response')
-            elif world[self.curr_room][self.touched_tile] == 7 :
+            elif curr_room[self.touched_tile] == 7 :
                 GamePrint("you feel a soft orb.", 'response')
         else :
             if self.touched_tile != None :
@@ -156,6 +165,8 @@ class Entity() :
                 GamePrint("you find nothing...", 'response')
         
         return front
+
+# ============================================================
 
 class Enemy() :
     def __init__(self, pos : list) -> None:
