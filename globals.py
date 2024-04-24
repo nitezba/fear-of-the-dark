@@ -129,6 +129,8 @@ class World() :
 
         steppable_neighbors = {}
         curr_room = self.getRoomData(room)
+        # might need to remove this - premature optimization, since i think we need
+        # to actually see it as a wall and give it that inf score
         for elt in valid_neighbors :
             check_for_wall = valid_neighbors[elt]
             if check_for_wall not in curr_room.keys() :

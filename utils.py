@@ -197,22 +197,46 @@ class Enemy() :
             print("ARRIVED")
             return True
 
+        frontier = []
+        frontier.append(tuple(self.pos))
+        came_from = {}
+        came_from[tuple(self.pos)] = None
+
+        # eexpand frontier
+        while frontier :
+            curr = frontier.pop(0)
+            neighbors = world.getValidNeighbors(self.curr_room, curr)
+            for elt in neighbors.values() :
+                if elt not in came_from :
+                    frontier.append(elt)
+                    came_from[elt] = curr 
+
+        # retrace path
+        path = []
+        curr = self.dest
+        while curr != tuple(self.pos) :
+            path.append(curr)
+            curr = came_from[curr]
+        path.reverse()
+
         if self.frame_counter == 0:
             self.frame_counter += 6
 
+        step_coord = path[0]
+
         # a star its way to the destination
-        neighbors = world.getValidNeighbors(self.curr_room, tuple(self.pos))
+        # neighbors = world.getValidNeighbors(self.curr_room, tuple(self.pos))
         
-        next_smallest_distance = 100
-        step_coord = None
-        # pick the closest one
-        for coord in neighbors.values() :
-            distance_x = abs(coord[0] - self.dest[0])
-            distance_y = abs(coord[1] - self.dest[1])
-            dist_sum = distance_x + distance_y
-            if dist_sum < next_smallest_distance :
-                next_smallest_distance = dist_sum
-                step_coord = list(coord)
+        # next_smallest_distance = 100
+        # step_coord = None
+        # # pick the closest one
+        # for coord in neighbors.values() :
+        #     distance_x = abs(coord[0] - self.dest[0])
+        #     distance_y = abs(coord[1] - self.dest[1])
+        #     dist_sum = distance_x + distance_y
+        #     if dist_sum < next_smallest_distance :
+        #         next_smallest_distance = dist_sum
+        #         step_coord = list(coord)
 
         if self.frame_counter % 10 == 0:
             self.pos = step_coord
