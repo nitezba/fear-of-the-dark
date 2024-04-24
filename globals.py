@@ -205,7 +205,6 @@ def generateRandomCoords() -> tuple :
 
     return (x,y)
 
-
 # "GLOBAL" DATA DECLARATION
 world = World()
 world.loadWorld()
@@ -218,10 +217,13 @@ s_destroy_tile  = pygame.mixer.Sound("./sfx/destroy_tile.wav")
 s_hand          = pygame.mixer.Sound("./sfx/hand.wav")
 s_touch         = pygame.mixer.Sound("./sfx/touch.wav")
 s_item          = pygame.mixer.Sound("./sfx/item.wav")
+s_respawn       = pygame.mixer.Sound("./sfx/respawn.wav")
+s_room_change   = pygame.mixer.Sound("./sfx/room_change.wav")
 
 render_world    = True
 render_player   = True
 render_text     = False
+render_enemy    = True
 
 tile_sprite     = load_image('./sprites/tile.png')
 player_sprite   = load_image('./sprites/player.png')
@@ -233,5 +235,5 @@ enemy_sprite    = load_image('./sprites/enemy.png')
 
 playing = True
 
-death_counter = 0
+death_counter = -1
 

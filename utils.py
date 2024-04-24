@@ -10,37 +10,48 @@ class FrameCounter() :
         self.touching       = 0
         self.enemy_walk     = 0
 
-def playCutscene(timer : FrameCounter) :
-    frame_diff = 128
-    if timer.text_timer == frame_diff * 0 :
-        GamePrint("You have suffered an untimely death.")
-    elif timer.text_timer == frame_diff * 1:
-        GamePrint("Time passes.")
-    elif timer.text_timer == frame_diff * 2 :
-        GamePrint("You wake up but cannot see anything.")
-    elif timer.text_timer == frame_diff * 3 :
-        GamePrint("Yet somehow this text speaks to you.")
-    elif timer.text_timer == frame_diff * 4 :
-        GamePrint("It might be time for you to get moving.")
-    elif timer.text_timer == frame_diff * 5 :
-        return
+# ============================================================
 
-    if timer.text_timer != frame_diff * 5 :
-        timer.text_timer += 1
+# return false if done else true
+def playCutscene(timer : FrameCounter, scene : str) -> bool :
+    if scene == 'first death' : 
+        frame_diff = 128
+        if timer.text_timer == frame_diff * 0 :
+            GamePrint("You have suffered an untimely death.")
+        elif timer.text_timer == frame_diff * 1:
+            GamePrint("Time passes.")
+        elif timer.text_timer == frame_diff * 2 :
+            GamePrint("You awaken but cannot see anything.")
+        elif timer.text_timer == frame_diff * 3 :
+            GamePrint("Yet somehow this text speaks to you.")
+        elif timer.text_timer == frame_diff * 4 :
+            GamePrint("It might be time for you to get moving.")
+        elif timer.text_timer == frame_diff * 5 :
+            return True
+
+        if timer.text_timer != frame_diff * 5 :
+            timer.text_timer += 1
 # ============================================================
 
 class Entity() :
-    def __init__(self, pos : list) -> None:
-        self.pos        : list  = pos
+    def __init__(self) -> None:
+        self.pos        : list  = [5,8]
         self.facing     : str   = 'u'
         self.is_walking : bool  = False
         self.is_touching: bool  = False
         self.touched_tile       = None
         self.curr_room  : str   = '1-0'
         self.can_walk   : bool  = True
+        self.step_count : int   = 0
         # unused so far
         self.health     : int   = 5
         self.inventory  : list  = []
+
+    def resetToStart(self) -> None :
+        self.pos        = [5,8]
+        self.curr_room = '1-0'
+        self.facing = 'u'
+        self.can_walk = True
 
     # def move(self, direction : str) -> tuple:
     def move(self) -> tuple:
@@ -71,6 +82,7 @@ class Entity() :
                 return tuple(invalid_pos)
 
         # ==========================================
+        previous_room : str = self.curr_room # '1-1'
         # walk to different room - y direction
         if self.pos[1] > 8 : # down
             if self.curr_room[0] == '1' : # off screen
@@ -81,17 +93,17 @@ class Entity() :
                 return -1 # might need to be different since this is the same as a successful step
             else : # just move down normally
                 GamePrint("southbound for some reason")
-                prev_level : int = int(self.curr_room[0])
-                room : str = self.curr_room[1:3]
+                prev_level : int = int(previous_room[0])    # 1
+                room : str = previous_room[1:3]             # '-1'
 
                 new_level = prev_level - 1
                 new_room_num = str(new_level) + room
                 self.curr_room = new_room_num
                 self.pos = [original_pos[0], 0]
-        if self.pos[1] < 0 : # up
-            GamePrint("reach for da stars")
-            prev_level : int = int(self.curr_room[0])
-            room : str = self.curr_room[1:3]
+        elif self.pos[1] < 0 : # up
+            GamePrint("you travel northbound")
+            prev_level : int = int(previous_room[0])
+            room : str = previous_room[1:3]
 
             new_level = prev_level + 1
             new_room_num = str(new_level) + room
@@ -102,10 +114,10 @@ class Entity() :
         # walk to different room - x direction
         if self.pos[0] < 0 : # left
             GamePrint("westward bound in search of better")
-            level : str = self.curr_room[0]
-            prev_room : int = int(self.curr_room[2])
+            level : str = previous_room[0]
+            prev_room : int = int(previous_room[2])
 
-            if self.curr_room[1] == '-':
+            if previous_room[1] == '-':
                 prev_room *= -1
 
             new_room_num : int = prev_room - 1
@@ -116,10 +128,10 @@ class Entity() :
             self.pos = [9, original_pos[1]] # we are now in the rightmost corner of the next room
         elif self.pos[0] > 9 : # right
             GamePrint("eastward bound in hopes of different")
-            level : str = self.curr_room[0]
+            level : str = previous_room[0]
 
-            prev_room : int = int(self.curr_room[2])
-            if self.curr_room[1] == '-':
+            prev_room : int = int(previous_room[2])
+            if previous_room[1] == '-':
                 prev_room *= -1
 
             new_room_num : int = prev_room + 1
@@ -129,10 +141,13 @@ class Entity() :
             self.curr_room = new_room
             self.pos = [0, original_pos[1]] # we are now in the leftmost corner of the next room
 
+        # this currently just plays over the sound in main.py - fine for now, but i was trying to have all sound over there
+        if previous_room != self.curr_room :
+            pygame.mixer.Sound.play(s_room_change)
 
         print("new pos", self.pos, " in room, ", self.curr_room)
         GamePrint("every new step you take could be the end", 'action')
-        # pygame.mixer.Sound.play(s_step)
+
         return tuple(self.pos)
 
     # there should be a limit on the number of times you can stretch your hand out
@@ -228,27 +243,9 @@ class Enemy() :
 
         step_coord = path[0]
 
-        # a star its way to the destination
-        # neighbors = world.getValidNeighbors(self.curr_room, tuple(self.pos))
-        
-        # next_smallest_distance = 100
-        # step_coord = None
-        # # pick the closest one
-        # for coord in neighbors.values() :
-        #     distance_x = abs(coord[0] - self.dest[0])
-        #     distance_y = abs(coord[1] - self.dest[1])
-        #     dist_sum = distance_x + distance_y
-        #     if dist_sum < next_smallest_distance :
-        #         next_smallest_distance = dist_sum
-        #         step_coord = list(coord)
-
         if self.frame_counter % 6 == 0:
             self.pos = step_coord
 
         self.frame_counter += 1
 
-        # return true on dest reached
-        # if step_coord == self.dest :
-        #     self.frame_counter = 0
-        #     return True
         return False

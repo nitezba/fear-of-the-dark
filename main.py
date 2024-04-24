@@ -3,15 +3,13 @@ clock = pygame.time.Clock()
 from pygame.locals import *
 from utils import *
 
-player = Entity(
-    [5, 8] # starting pos at bottom middle of grid
-)
+player = Entity()
+player.resetToStart()
 
 borg = Enemy(
     [1,1]
 )
 borg.curr_room = '2-0'
-# borg.dest = (5,1)
 
 frame_counter = FrameCounter()
 
@@ -19,16 +17,11 @@ frame_start = 0
 frame_end = pygame.time.get_ticks()
 dt = frame_end - frame_start
 
-GamePrint("A Fear of the Dark consumes you.")
-
 while playing:
     raw_window.fill((0,0,0))
 
     new_tile = None
     touching = False
-
-    if death_counter == 1: 
-        playCutscene(frame_counter)
 
     for event in pygame.event.get() :
         if event.type == QUIT:
@@ -137,18 +130,18 @@ while playing:
     # if in the same room as an (the) enemy
     if player.curr_room == borg.curr_room :
         borg.dest = tuple(player.pos)
-        if borg.move_to_dest() and death_counter == 0:
+        if borg.move_to_dest() and death_counter == -1:
             # borg.flip_dest()
             render_player       = False
             render_world        = False
             render_text         = True
             player.can_walk     = False
-            death_counter = 1
+            death_counter = 0
             pygame.mixer.Sound.play(s_death)
         
         # if player.pos == borg.pos and death_counter == 0: 
-            
-        raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
+        if render_enemy:
+            raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
     # outstretched hand action
     if player.is_touching and frame_counter.touching < 6:
@@ -171,6 +164,14 @@ while playing:
                 raw_window.blit(sprite, pygame.Rect(num * 4, 145 + (6 * line_num), 4, 4))
                 num += 1
             line_num += 1
+
+    if death_counter == 0: 
+        if playCutscene(frame_counter, 'first death') :
+            death_counter += 1
+            render_enemy = False
+            pygame.mixer.Sound.play(s_respawn)
+            GamePrint("A Fear of the Dark consumes you.")
+            player.resetToStart()
 
     # ==============================
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())
