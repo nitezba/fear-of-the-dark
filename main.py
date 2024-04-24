@@ -1,3 +1,4 @@
+# DOING : MAKE IT SO THAT PICKING UP ONE EYE DELETES THE OTHER ONE!!!!
 import pygame
 clock = pygame.time.Clock()
 from pygame.locals import *
@@ -33,7 +34,7 @@ while playing:
             print("KD")
             if event.key == K_ESCAPE:
                 playing = False
-            if player.can_walk :
+            if player.can_act :
                 if event.key == K_w:
                     player.facing = 'u'
                     player.is_walking = True
@@ -50,9 +51,9 @@ while playing:
                     player.facing = 'r'
                     player.is_walking = True
                     frame_counter.walking += 12
-            if event.key == K_SPACE :
-                frame_counter.touching = 0
-                player.stretch()
+                if event.key == K_SPACE :
+                    frame_counter.touching = 0
+                    player.stretch()
             if event.key == K_m :
                 render_world = not render_world
             if event.key == K_p :
@@ -78,9 +79,11 @@ while playing:
         # let's arbitrarily say that if we're walking, we're allowed to take a step every 16 (12 i guess) frames
         if frame_counter.walking % 12 == 0 :
             new_tile = player.move()
-            print(new_tile)
         
         frame_counter.walking += 1
+
+    if player.step_count == 5 :
+        GamePrint("Your eyes are somewhere in this dungeon.", 'highlight', False)
 
     # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT, THIS HANDLES THE WORLD'S RESPONSE
     # we check the new_tile so that we can still respond specifically to the cases
@@ -122,9 +125,28 @@ while playing:
                 raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
             if curr_room_data[tile_coord] == 102 :
                 raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-
+    elif render_items: 
+        for tile_coord in curr_room_data.keys() :
+            if curr_room_data[tile_coord] == 101 :
+                raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
+            if curr_room_data[tile_coord] == 102 :
+                raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
+    
     if render_player :
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
+
+    # outstretched hand action
+    # NOTE - things are weird if i keep this coupled with the above render player check 
+    # doing this separately here makes it so that if it's a frame where the action was detected
+    # AND the rendering is true, then it'll respond, as opposed to an if then, which kinda
+    # stores the stretch rendering for whenever the flag gets set
+    if render_player and player.is_touching and frame_counter.touching < 6:
+        raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
+        frame_counter.touching += 1
+    else : 
+        player.is_touching = False
+        player.touched_tile = None
+
 
     # ENEMY RENDERING + LOGIC (might be smart to decouple these later)
     # if in the same room as an (the) enemy
@@ -135,22 +157,15 @@ while playing:
             render_player       = False
             render_world        = False
             render_text         = True
-            player.can_walk     = False
+            player.can_act      = False
             death_counter = 0
+            world.spawnItems()
             pygame.mixer.Sound.play(s_death)
         
         # if player.pos == borg.pos and death_counter == 0: 
         if render_enemy:
             raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
-    # outstretched hand action
-    if player.is_touching and frame_counter.touching < 6:
-        raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
-        frame_counter.touching += 1
-    else : 
-        player.is_touching = False
-        player.touched_tile = None
-    
     # text area =====           
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
@@ -169,8 +184,9 @@ while playing:
         if playCutscene(frame_counter, 'first death') :
             death_counter += 1
             render_enemy = False
+            render_items = False
             pygame.mixer.Sound.play(s_respawn)
-            GamePrint("A Fear of the Dark consumes you.")
+            GamePrint("A Fear of the Dark consumes you.", 'highlight')
             player.resetToStart()
 
     # ==============================

@@ -41,17 +41,18 @@ class Entity() :
         self.is_touching: bool  = False
         self.touched_tile       = None
         self.curr_room  : str   = '1-0'
-        self.can_walk   : bool  = True
+        self.can_act   : bool  = True
         self.step_count : int   = 0
         # unused so far
         self.health     : int   = 5
         self.inventory  : list  = []
 
     def resetToStart(self) -> None :
-        self.pos        = [5,8]
-        self.curr_room = '1-0'
-        self.facing = 'u'
-        self.can_walk = True
+        self.pos            = [5,8]
+        self.curr_room      = '1-0'
+        self.facing         = 'u'
+        self.can_act       = True
+        self.step_count     = 0
 
     # def move(self, direction : str) -> tuple:
     def move(self) -> tuple:
@@ -148,6 +149,7 @@ class Entity() :
         print("new pos", self.pos, " in room, ", self.curr_room)
         GamePrint("every new step you take could be the end", 'action')
 
+        self.step_count += 1
         return tuple(self.pos)
 
     # there should be a limit on the number of times you can stretch your hand out
@@ -209,7 +211,6 @@ class Enemy() :
     # take a SINGLE STEP in target destination
     def move_to_dest(self) -> bool :
         if tuple(self.pos) == self.dest :
-            print("ARRIVED")
             return True
 
         frontier = []

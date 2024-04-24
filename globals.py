@@ -63,8 +63,9 @@ def TextToImg(text : str, rgb : tuple = None) -> list:
 # color as the player and world as the world
 # BUG : repeated print is weird with multi lines, try touching a wall a bunch
     # THIS IS BECAUSE OF REPEATED CALLS TO GAMEEPRINT
-on_screen_text : list = [] # should only ever have size five
-def GamePrint(text : str, text_type : str = None) :
+on_screen_text  : list = [] # should only ever have size five
+raw_text        : list = []
+def GamePrint(text : str, text_type : str = None, allow_repeat : bool = True) :
     color = None
     if text_type == 'action' :
         color = (255, 0, 0)
@@ -72,10 +73,18 @@ def GamePrint(text : str, text_type : str = None) :
         color = (0, 212, 255)
     elif text_type == 'item' :
         color = (255, 0, 255)
+    elif text_type == 'highlight' :
+        color = (255, 255, 0)
 
     if len(text) <= 40 :
+        if not allow_repeat :
+            if raw_text[4] == text : # trying to add something that is the same as last thing printed
+                return
+
+        raw_text.append(text)
         on_screen_text.append(TextToImg(text, color))
         if len(on_screen_text) > 5:
+            raw_text.pop(0)
             on_screen_text.pop(0)
     else :
         left = text[0:40]
@@ -208,7 +217,7 @@ def generateRandomCoords() -> tuple :
 # "GLOBAL" DATA DECLARATION
 world = World()
 world.loadWorld()
-world.spawnItems()
+# world.spawnItems()
 
 s_step          = pygame.mixer.Sound("./sfx/step.wav")
 s_blocked_step  = pygame.mixer.Sound("./sfx/blocked_step.wav")
@@ -224,6 +233,7 @@ render_world    = True
 render_player   = True
 render_text     = False
 render_enemy    = True
+render_items    = True
 
 tile_sprite     = load_image('./sprites/tile.png')
 player_sprite   = load_image('./sprites/player.png')
@@ -236,4 +246,3 @@ enemy_sprite    = load_image('./sprites/enemy.png')
 playing = True
 
 death_counter = -1
-
