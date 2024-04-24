@@ -137,17 +137,16 @@ while playing:
     # if in the same room as an (the) enemy
     if player.curr_room == borg.curr_room :
         borg.dest = tuple(player.pos)
-        if borg.move_to_dest() :
+        if borg.move_to_dest() and death_counter == 0:
             # borg.flip_dest()
-            pass
-        
-        if player.pos == borg.pos and death_counter == 0: 
             render_player       = False
             render_world        = False
             render_text         = True
             player.can_walk     = False
             death_counter = 1
             pygame.mixer.Sound.play(s_death)
+        
+        # if player.pos == borg.pos and death_counter == 0: 
             
         raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 

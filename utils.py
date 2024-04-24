@@ -205,6 +205,10 @@ class Enemy() :
         # eexpand frontier
         while frontier :
             curr = frontier.pop(0)
+
+            if curr == self.dest :
+                break
+
             neighbors = world.getValidNeighbors(self.curr_room, curr)
             for elt in neighbors.values() :
                 if elt not in came_from :
@@ -238,7 +242,7 @@ class Enemy() :
         #         next_smallest_distance = dist_sum
         #         step_coord = list(coord)
 
-        if self.frame_counter % 10 == 0:
+        if self.frame_counter % 6 == 0:
             self.pos = step_coord
 
         self.frame_counter += 1
