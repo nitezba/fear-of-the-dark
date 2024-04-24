@@ -11,7 +11,7 @@ borg = Enemy(
     [1,1]
 )
 borg.curr_room = '2-0'
-borg.dest = (5,1)
+# borg.dest = (5,1)
 
 frame_counter = FrameCounter()
 
@@ -99,14 +99,14 @@ while playing:
     curr_room_data = world.getRoomData(player.curr_room)
 
     if new_tile in curr_room_data.keys() : # since the keys are the coords with something in them
-        if curr_room_data[new_tile] == 7 :
+        if curr_room_data[new_tile] == 101 :
             GamePrint("You pick up the orb of shitting.", 'item')
             GamePrint("The world becomes clearer to you.", 'response')
             world.removeItem(player.curr_room, new_tile)
             pygame.mixer.Sound.play(s_item)
             render_world = True
             # need to find that item in our world dict and remove it though
-        elif curr_room_data[new_tile] == 8 :
+        elif curr_room_data[new_tile] == 102 :
             GamePrint("You pick up the orb of pissing.", 'item')
             GamePrint("You seem to step outside yourself.", 'response')
             world.removeItem(player.curr_room, new_tile)
@@ -115,7 +115,7 @@ while playing:
         elif curr_room_data[new_tile] == 4:
             pygame.mixer.Sound.play(s_blocked_step)
             GamePrint("something blocks your path.", 'response')
-    elif new_tile == -1 : # took a step, specificall down and outside the map
+    elif new_tile == -1 : # took a step, specifically down and outside the map
         pygame.mixer.Sound.play(s_blocked_step)
     elif new_tile != None : # took a step into empty space
         pygame.mixer.Sound.play(s_step)
@@ -125,9 +125,9 @@ while playing:
         for tile_coord in curr_room_data.keys() :
             if curr_room_data[tile_coord] == 4 : # wall
                 raw_window.blit(tile_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 7 :
+            if curr_room_data[tile_coord] == 101 :
                 raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 8 :
+            if curr_room_data[tile_coord] == 102 :
                 raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
 
     if render_player :
@@ -136,14 +136,19 @@ while playing:
     # ENEMY RENDERING + LOGIC (might be smart to decouple these later)
     # if in the same room as an (the) enemy
     if player.curr_room == borg.curr_room :
-        borg.dest = player.pos
+        borg.dest = tuple(player.pos)
         if borg.move_to_dest() :
-            borg.flip_dest()
+            # borg.flip_dest()
+            pass
         
         if player.pos == borg.pos and death_counter == 0: 
-            render_player = False
+            render_player       = False
+            render_world        = False
+            render_text         = True
+            player.can_walk     = False
             death_counter = 1
             pygame.mixer.Sound.play(s_death)
+            
         raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
 
     # outstretched hand action
@@ -153,8 +158,6 @@ while playing:
     else : 
         player.is_touching = False
         player.touched_tile = None
-    # if touching :
-    #     raw_window.blit(grab_sprite, (touched_tile[0] * 16, touched_tile[1] * 16))
     
     # text area =====           
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))

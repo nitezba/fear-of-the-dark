@@ -5,23 +5,27 @@ from globals import *
 # will use for frame counting stuff
 class FrameCounter() :
     def __init__(self) -> None:
-        self.text_timer = 0
-        self.walking = 0
-        self.touching = 0
+        self.text_timer     = 0
+        self.walking        = 0
+        self.touching       = 0
+        self.enemy_walk     = 0
 
 def playCutscene(timer : FrameCounter) :
-    if timer.text_timer == 64 * 0 :
+    frame_diff = 128
+    if timer.text_timer == frame_diff * 0 :
         GamePrint("You have suffered an untimely death.")
-    elif timer.text_timer == 64 * 1:
+    elif timer.text_timer == frame_diff * 1:
         GamePrint("Time passes.")
-    elif timer.text_timer == 64 * 2 :
+    elif timer.text_timer == frame_diff * 2 :
         GamePrint("You wake up but cannot see anything.")
-    elif timer.text_timer == 64 * 3 :
+    elif timer.text_timer == frame_diff * 3 :
         GamePrint("Yet somehow this text speaks to you.")
-    elif timer.text_timer == 64 * 4 :
+    elif timer.text_timer == frame_diff * 4 :
+        GamePrint("It might be time for you to get moving.")
+    elif timer.text_timer == frame_diff * 5 :
         return
 
-    if timer.text_timer != 64 * 4 :
+    if timer.text_timer != frame_diff * 5 :
         timer.text_timer += 1
 # ============================================================
 
@@ -176,7 +180,7 @@ class Enemy() :
         self.pos        : list  = pos
         self.facing     : str   = 'u'
         self.health     : int   = 5
-        self.curr_room  : str   = '1-0'
+        self.curr_room  : str   = '2-0'
         self.frame_counter : int= 0
         self.dest       : tuple = None
 
@@ -192,41 +196,31 @@ class Enemy() :
         if tuple(self.pos) == self.dest :
             print("ARRIVED")
             return True
-        
+
         if self.frame_counter == 0:
             self.frame_counter += 6
 
-        distance_x = self.pos[0] - self.dest[0] 
-        distance_y = self.pos[1] - self.dest[1]
+        # a star its way to the destination
+        neighbors = world.getValidNeighbors(self.curr_room, tuple(self.pos))
         
-        new_pos = None
+        next_smallest_distance = 100
+        step_coord = None
+        # pick the closest one
+        for coord in neighbors.values() :
+            distance_x = abs(coord[0] - self.dest[0])
+            distance_y = abs(coord[1] - self.dest[1])
+            dist_sum = distance_x + distance_y
+            if dist_sum < next_smallest_distance :
+                next_smallest_distance = dist_sum
+                step_coord = list(coord)
 
-        # TODO : COLLISION HANDLING
-
-        # x dir is further
-        if abs(distance_x) > abs(distance_y) :
-            # check if we need to move left or right
-            if distance_x > 0 : # need to move left
-                new_pos = [self.pos[0] - 1, self.pos[1]]
-            else : # need to move right
-                new_pos = [self.pos[0] + 1, self.pos[1]]
-        else :
-            if distance_y > 0 : # need to move left
-                new_pos = [self.pos[0], self.pos[1] - 1]
-            else : # need to move right
-                new_pos = [self.pos[0], self.pos[1] + 1]
-            # check if we need to move up or down
-        
-        # every twelveth frame it will be allowed to take a step
         if self.frame_counter % 10 == 0:
-            self.pos = new_pos
-            # while new_pos == None :
-            #     pass
+            self.pos = step_coord
 
         self.frame_counter += 1
 
         # return true on dest reached
-        if new_pos == self.dest :
-            self.frame_counter = 0
-            return True
+        # if step_coord == self.dest :
+        #     self.frame_counter = 0
+        #     return True
         return False

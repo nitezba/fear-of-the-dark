@@ -114,6 +114,32 @@ class World() :
     def getRoomData(self, room : str) -> dict :
         return self.world_data[room]
 
+    # returns the empty/steppable tiles nearby a coord
+    def getValidNeighbors(self, room : str, coords : tuple) -> dict :
+        left = (coords[0] - 1, coords[1]) if coords[0] > 0 else None
+        right = (coords[0] + 1, coords[1]) if coords[0] < 9 else None  # 10 should be the tile limit
+        top = (coords[0], coords[1] - 1) if coords[1] > 0 else None
+        bottom = (coords[0], coords[1] + 1) if coords[1] < 8 else None  # 9 should be the tile limit
+ 
+        all_neighbors = {'l' : left, 'r' : right, 'u' : top, 'd' : bottom}
+        valid_neighbors = {}
+        for elt in all_neighbors:
+            if all_neighbors[elt] != None :
+                valid_neighbors[elt] = all_neighbors[elt]
+
+        steppable_neighbors = {}
+        curr_room = self.getRoomData(room)
+        for elt in valid_neighbors :
+            check_for_wall = valid_neighbors[elt]
+            if check_for_wall not in curr_room.keys() :
+                steppable_neighbors[elt] = valid_neighbors[elt]
+            elif curr_room[check_for_wall] == 4 :
+                pass
+            else : # that tile is likely an item
+                steppable_neighbors[elt] = valid_neighbors[elt]
+
+        return steppable_neighbors
+
     def removeItem(self, room : str ,tile : tuple) -> None :
         self.world_data[room].pop(tile)
 
@@ -121,6 +147,7 @@ class World() :
     def loadRoom(self, filename : str) -> dict :
         file = open(filename)
         data = json.load(file)
+                # tuple : int are the kv pairs here
         world = {ast.literal_eval(k):v for (k,v) in data.items()}
         return world
     
@@ -140,18 +167,19 @@ class World() :
         # return world_dict
         self.world_data = world_dict
 
+    # we're gonna make items 3 digit
     def spawnItems(self) -> None :
         eye_coords = generateRandomCoords()
         while eye_coords in self.world_data['2-0'].keys():
             eye_coords = generateRandomCoords()
         # place the eye inside our actual data representation of the world
-        self.world_data['2-0'][eye_coords] = 7
+        self.world_data['2-0'][eye_coords] = 101
         self.items['eye 1'] = eye_coords
 
         eye2_coords = generateRandomCoords()
         while eye2_coords in self.world_data['2-0'].keys():
             eye2_coords = generateRandomCoords()
-        self.world_data['2-0'][eye2_coords] = 8
+        self.world_data['2-0'][eye2_coords] = 102
         self.items['eye 2'] = eye2_coords
 
 
@@ -179,7 +207,7 @@ def generateRandomCoords() -> tuple :
 # "GLOBAL" DATA DECLARATION
 world = World()
 world.loadWorld()
-# world.spawnItems()
+world.spawnItems()
 
 s_step          = pygame.mixer.Sound("./sfx/step.wav")
 s_blocked_step  = pygame.mixer.Sound("./sfx/blocked_step.wav")
