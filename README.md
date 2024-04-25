@@ -18,6 +18,7 @@ but how about a whole adventure game set in the dark
 
 ### ITEM IDEAS
 - movement speed item
+- torch to see immediately adjacent tiles
 
 ## DECISIONS
 

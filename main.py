@@ -5,6 +5,9 @@ from pygame.locals import *
 from utils import *
 
 player = Entity()
+player.inventoryAdd('world eye')
+player.inventoryAdd('self eye')
+player.inventoryAdd('item eye')
 player.resetToStart()
 
 borg = Enemy(
@@ -55,11 +58,20 @@ while playing:
                     frame_counter.touching = 0
                     player.stretch()
             if event.key == K_m :
-                render_world = not render_world
+                if player.inventoryContains('world eye') :
+                    player.inventoryRemove('world eye')
+                else :
+                    player.inventoryAdd('world eye')
             if event.key == K_p :
-                render_player = not render_player
+                if player.inventoryContains('self eye') :
+                    player.inventoryRemove('self eye')
+                else :
+                    player.inventoryAdd('self eye')
             if event.key == K_t :
-                render_text = not render_text
+                if player.inventoryContains('text eye') :
+                    player.inventoryRemove('text eye')
+                else :
+                    player.inventoryAdd('text eye')
 
         elif event.type == KEYUP : 
             if event.key == K_w and player.facing == 'u':
@@ -96,18 +108,18 @@ while playing:
 
     if new_tile in curr_room_data.keys() : # since the keys are the coords with something in them
         if curr_room_data[new_tile] == 101 :
-            GamePrint("You pick up the orb of shitting.", 'item')
+            GamePrint("You slide a slimy eye back into place.", 'item')
             GamePrint("The world becomes clearer to you.", 'response')
             world.removeItem(player.curr_room, new_tile)
+            player.inventoryAdd('world eye')
             pygame.mixer.Sound.play(s_item)
-            render_world = True
             # need to find that item in our world dict and remove it though
         elif curr_room_data[new_tile] == 102 :
-            GamePrint("You pick up the orb of pissing.", 'item')
+            GamePrint("You slide a slimy eye back into place.", 'item')
             GamePrint("You seem to step outside yourself.", 'response')
             world.removeItem(player.curr_room, new_tile)
+            player.inventoryAdd('self eye')
             pygame.mixer.Sound.play(s_item)
-            render_player = True
         elif curr_room_data[new_tile] == 4:
             pygame.mixer.Sound.play(s_blocked_step)
             GamePrint("something blocks your path.", 'response')
@@ -117,7 +129,7 @@ while playing:
         pygame.mixer.Sound.play(s_step)
 
     # game area
-    if render_world :
+    if player.inventoryContains('world eye') : 
         for tile_coord in curr_room_data.keys() :
             if curr_room_data[tile_coord] == 4 : # wall
                 raw_window.blit(tile_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
@@ -132,7 +144,7 @@ while playing:
             if curr_room_data[tile_coord] == 102 :
                 raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
     
-    if render_player :
+    if player.inventoryContains('self eye') : 
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
 
     # outstretched hand action
@@ -140,7 +152,7 @@ while playing:
     # doing this separately here makes it so that if it's a frame where the action was detected
     # AND the rendering is true, then it'll respond, as opposed to an if then, which kinda
     # stores the stretch rendering for whenever the flag gets set
-    if render_player and player.is_touching and frame_counter.touching < 6:
+    if player.inventoryContains('self eye') and player.is_touching and frame_counter.touching < 6:
         raw_window.blit(grab_sprite, (player.touched_tile[0] * 16, player.touched_tile[1] * 16))
         frame_counter.touching += 1
     else : 
@@ -154,9 +166,9 @@ while playing:
         borg.dest = tuple(player.pos)
         if borg.move_to_dest() and death_counter == -1:
             # borg.flip_dest()
-            render_player       = False
-            render_world        = False
-            render_text         = True
+            player.inventoryRemove('self eye')
+            player.inventoryRemove('world eye')
+            player.inventoryAdd('text eye')
             player.can_act      = False
             death_counter = 0
             world.spawnItems()
@@ -172,7 +184,7 @@ while playing:
     # TEXT RENDERING ==========
     
     line_num = 0
-    if render_text :
+    if player.inventoryContains('text eye'):
         for s in on_screen_text :
             num = 0
             for sprite in s:

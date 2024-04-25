@@ -151,7 +151,7 @@ class World() :
 
         return steppable_neighbors
 
-    def removeItem(self, room : str ,tile : tuple) -> None :
+    def removeItem(self, room : str, tile : tuple) -> None :
         self.world_data[room].pop(tile)
 
     # loads an individual room from json

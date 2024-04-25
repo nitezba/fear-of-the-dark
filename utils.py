@@ -51,7 +51,7 @@ class Entity() :
         self.pos            = [5,8]
         self.curr_room      = '1-0'
         self.facing         = 'u'
-        self.can_act       = True
+        self.can_act        = True
         self.step_count     = 0
 
     # def move(self, direction : str) -> tuple:
@@ -151,6 +151,27 @@ class Entity() :
 
         self.step_count += 1
         return tuple(self.pos)
+
+    # this is a silly way of doing this but for now i think im just gonna manually encode 
+    # what items do with string comparisons of their names and if blocks - this doesn't scale well
+    # an item class with name and properties might be useful
+    def inventoryAdd(self, item : str) -> None :
+        self.inventory.append(item)
+
+        if item == 'self eye' :
+            pass
+        elif item == 'world eye' :
+            pass
+
+    def inventoryRemove(self, item : str) -> None :
+        if item in self.inventory :
+            self.inventory.remove(item)
+
+    def inventoryContains(self, item : str) -> bool :
+        if item in self.inventory :
+            return True
+        
+        return False
 
     # there should be a limit on the number of times you can stretch your hand out
     # there should also be some other way to interact with the world, maybe different responses for walking into stuff
