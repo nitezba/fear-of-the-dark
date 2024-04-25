@@ -76,6 +76,7 @@ def GamePrint(text : str, text_type : str = None, allow_repeat : bool = True) :
     elif text_type == 'highlight' :
         color = (255, 255, 0)
 
+    # TODO : fix bug with blocked path repeat
     if len(text) <= 40 :
         if not allow_repeat :
             if text in raw_text : # trying to add something that is the same as last thing printed
@@ -127,13 +128,16 @@ class World() :
         return self.world_data[room]
 
     # returns the empty/steppable tiles nearby a coord
-    def getValidNeighbors(self, room : str, coords : tuple) -> dict :
+    def getValidNeighbors(self, room : str, coords : tuple, all : bool = False) -> dict :
         left = (coords[0] - 1, coords[1]) if coords[0] > 0 else None
         right = (coords[0] + 1, coords[1]) if coords[0] < 9 else None  # 10 should be the tile limit
         top = (coords[0], coords[1] - 1) if coords[1] > 0 else None
         bottom = (coords[0], coords[1] + 1) if coords[1] < 8 else None  # 9 should be the tile limit
  
         all_neighbors = {'l' : left, 'r' : right, 'u' : top, 'd' : bottom}
+        if all :
+            return all_neighbors
+        
         valid_neighbors = {}
         for elt in all_neighbors:
             if all_neighbors[elt] != None :
@@ -196,6 +200,26 @@ class World() :
         # return world_dict
         self.world_data = world_dict
 
+    # type will LIMIT what gets rendered
+    def renderTile(self, room : str,  coords : tuple, type : str = 'all') -> None:
+        room_data = self.getRoomData(room)
+        
+        if type == 'only items' :
+            pass 
+        else :
+            if room_data[coords] == 4 : # wall
+                raw_window.blit(tile_sprite, (coords[0] * 16, coords[1] * 16))
+
+        
+        if room_data[coords] == 101 :
+            raw_window.blit(eye_sprite, (coords[0] * 16, coords[1] * 16))
+        if room_data[coords] == 102 :
+            raw_window.blit(eye2_sprite, (coords[0] * 16, coords[1] * 16))
+        if room_data[coords] == 171 :
+            raw_window.blit(oneup_sprite, (coords[0] * 16, coords[1] * 16))
+        if room_data[coords] == 111 :
+            raw_window.blit(torch_sprite, (coords[0] * 16, coords[1] * 16))
+
     # we're gonna make items 3 digit
     def spawnItems(self) -> None :
         # list of code : coord pairs in room 2-0
@@ -204,6 +228,7 @@ class World() :
         self.itemAdd('2-0', 101)
         self.itemAdd('2-0', 102)
         self.itemAdd('1-1', 171, (1,1))
+        self.itemAdd('1+1', 111, (1,1))
 
 
 # TODO - move this into the class
@@ -256,6 +281,7 @@ grab_sprite_raw = load_image('./sprites/grab.png')
 grab_sprite     = pygame.transform.scale(grab_sprite_raw, (16,16))
 enemy_sprite    = load_image('./sprites/enemy.png')
 oneup_sprite    = load_image('./sprites/oneup.png')
+torch_sprite    = load_image('./sprites/torch.png')
 
 playing = True
 

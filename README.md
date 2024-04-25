@@ -31,6 +31,8 @@ but how about a whole adventure game set in the dark
 
     - maybe having the map off will tell you your coords by default
 
+- you will die to one hit - part of the point is memorizing dungeon layout so it makes sense to make the player do it a few times
+
 ==================
 ## TODOS
 

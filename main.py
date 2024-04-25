@@ -81,6 +81,8 @@ while playing:
                     player.inventoryRemove('text eye')
                 else :
                     player.inventoryAdd('text eye')
+            if event.key == K_i :
+                print(player.inventory)
 
         elif event.type == KEYUP : 
             if event.key == K_w and player.facing == 'u':
@@ -131,11 +133,20 @@ while playing:
 
             world.itemRemove(player.curr_room, 101)
             GamePrint("You hear something crush your other eye.", 'item')
+            
         elif curr_room_data[new_tile] == 171 : 
             GamePrint("You feel invigorated.", 'item')
             world.itemRemove(player.curr_room, 171)
 
             pygame.mixer.Sound.play(s_oneup)
+
+        elif curr_room_data[new_tile] == 111 :
+            if player.inventoryContains('self eye') :
+                GamePrint("A faint light surrounds you.", 'item')
+                world.itemRemove(player.curr_room, 111)
+                player.inventoryAdd('torch')
+                pygame.mixer.Sound.play(s_item)
+
         elif curr_room_data[new_tile] == 4:
             pygame.mixer.Sound.play(s_blocked_step)
             GamePrint("something blocks your path.", 'response', False)
@@ -147,25 +158,18 @@ while playing:
     # game area
     if player.inventoryContains('world eye') : 
         for tile_coord in curr_room_data.keys() :
-            if curr_room_data[tile_coord] == 4 : # wall
-                raw_window.blit(tile_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 101 :
-                raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 102 :
-                raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 171 :
-                raw_window.blit(oneup_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
+            world.renderTile(player.curr_room, tile_coord)
     elif render_items: 
         for tile_coord in curr_room_data.keys() :
-            if curr_room_data[tile_coord] == 101 :
-                raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 102 :
-                raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-            if curr_room_data[tile_coord] == 171 :
-                raw_window.blit(oneup_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
-    
+            world.renderTile(player.curr_room, tile_coord, 'only items')
+            
     if player.inventoryContains('self eye') : 
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
+
+        if player.inventoryContains('torch') : 
+            adjacent_tiles = world.getValidNeighbors(player.curr_room, player.pos, True)
+            for elt in adjacent_tiles.values() :
+                print(elt)
 
     # outstretched hand action
     # NOTE - things are weird if i keep this coupled with the above render player check 
@@ -202,7 +206,6 @@ while playing:
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # pygame.draw.rect(raw_window, (255, 255, 255), pygame.Rect(0, 144, WIN_WIDTH, 64))
     # TEXT RENDERING ==========
-    
     line_num = 0
     if player.inventoryContains('text eye'):
         for s in on_screen_text :
