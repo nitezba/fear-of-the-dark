@@ -78,7 +78,7 @@ def GamePrint(text : str, text_type : str = None, allow_repeat : bool = True) :
 
     if len(text) <= 40 :
         if not allow_repeat :
-            if raw_text[4] == text : # trying to add something that is the same as last thing printed
+            if text in raw_text : # trying to add something that is the same as last thing printed
                 return
 
         raw_text.append(text)
@@ -118,6 +118,9 @@ class World() :
         # to keep a separate list of item names and their respective coords in a dict
         # actually i think it makes more sense if the key is the items unique integer and
         # the value is the sprite itself?
+
+        # only for items, we kinda need to reverse index, so it'll be value : worlddata key
+        # {'room' : {item code : coords}}
         self.items          : dict = {}
 
     def getRoomData(self, room : str) -> dict :
@@ -151,8 +154,23 @@ class World() :
 
         return steppable_neighbors
 
-    def removeItem(self, room : str, tile : tuple) -> None :
-        self.world_data[room].pop(tile)
+    def itemRemove(self, room : str, item_code : int) -> None :
+        item_coords = self.items[room][item_code]
+        self.world_data[room].pop(item_coords)
+        self.items[room].pop(item_code)
+
+    # could return a bool - false if it already exists otherwise true
+    def itemAdd(self, room : str, item_code : int, coords : tuple = None) -> None :
+        # none in coords will indicate random
+        if coords == None :
+            coords = generateRandomCoords()
+            while coords in self.world_data[room].keys() :
+                coords = generateRandomCoords()
+
+        self.world_data[room][coords] = item_code
+        if room not in self.items.keys() :
+            self.items[room] = {}
+        self.items[room][item_code] = coords
 
     # loads an individual room from json
     def loadRoom(self, filename : str) -> dict :
@@ -180,18 +198,12 @@ class World() :
 
     # we're gonna make items 3 digit
     def spawnItems(self) -> None :
-        eye_coords = generateRandomCoords()
-        while eye_coords in self.world_data['2-0'].keys():
-            eye_coords = generateRandomCoords()
-        # place the eye inside our actual data representation of the world
-        self.world_data['2-0'][eye_coords] = 101
-        self.items['eye 1'] = eye_coords
+        # list of code : coord pairs in room 2-0
+        self.items['2-0'] = {}
 
-        eye2_coords = generateRandomCoords()
-        while eye2_coords in self.world_data['2-0'].keys():
-            eye2_coords = generateRandomCoords()
-        self.world_data['2-0'][eye2_coords] = 102
-        self.items['eye 2'] = eye2_coords
+        self.itemAdd('2-0', 101)
+        self.itemAdd('2-0', 102)
+        self.itemAdd('1-1', 171, (1,1))
 
 
 # TODO - move this into the class
@@ -228,6 +240,7 @@ s_touch         = pygame.mixer.Sound("./sfx/touch.wav")
 s_item          = pygame.mixer.Sound("./sfx/item.wav")
 s_respawn       = pygame.mixer.Sound("./sfx/respawn.wav")
 s_room_change   = pygame.mixer.Sound("./sfx/room_change.wav")
+s_oneup         = pygame.mixer.Sound("./sfx/oneup.wav")
 
 render_world    = True
 render_player   = True
@@ -242,6 +255,7 @@ eye2_sprite     = load_image('./sprites/eye2.png')
 grab_sprite_raw = load_image('./sprites/grab.png')
 grab_sprite     = pygame.transform.scale(grab_sprite_raw, (16,16))
 enemy_sprite    = load_image('./sprites/enemy.png')
+oneup_sprite    = load_image('./sprites/oneup.png')
 
 playing = True
 

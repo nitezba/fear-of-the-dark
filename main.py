@@ -1,4 +1,13 @@
-# DOING : MAKE IT SO THAT PICKING UP ONE EYE DELETES THE OTHER ONE!!!!
+# TODO : BETTER NAVIGATION IN THE DARK - WITH ONLY ONE EYE
+# - BONUS ITEMS IN THE SIDE ROOMS THAT YOU CAN ONLY PICK UP BEFORE PICKING UP EITHER OF YOUR EYES AND AFTER DYING
+# - THINK SPECIFICALLY ABOUT HOW THE WORLD WILL RESPOND TO EACH EYE PICK UP
+
+# item in side room will be extra life
+    # this implies being able to survive a hit of an enemy - are all enemies kamikaze warriors
+    # this implies the need for a health bar
+    # kamikaze and projectiles
+
+# MAYBE STRETCH SHOULD BE MORE LENIENT AND TELL YOU ALL NEIGHBORS
 import pygame
 clock = pygame.time.Clock()
 from pygame.locals import *
@@ -10,10 +19,10 @@ player.inventoryAdd('self eye')
 player.inventoryAdd('item eye')
 player.resetToStart()
 
-borg = Enemy(
+kamikaze = Enemy(
     [1,1]
 )
-borg.curr_room = '2-0'
+kamikaze.curr_room = '2-0'
 
 frame_counter = FrameCounter()
 
@@ -94,15 +103,10 @@ while playing:
         
         frame_counter.walking += 1
 
-    if player.step_count == 5 :
-        GamePrint("Your eyes are somewhere in this dungeon.", 'highlight', False)
-
     # IF WE INTERACT WITH SOMETHING - ANYTHING - IN THE ENVIRONMENT, THIS HANDLES THE WORLD'S RESPONSE
     # we check the new_tile so that we can still respond specifically to the cases
     # where this is a "new" tile but we dont move to it. additionally to be able to make specific
     # responses to item pick ups
-    # NOTE: i dont think we can check for enemy collision here since this only checks on an event happening on
-    # A SINGLE FRAME
 
     curr_room_data = world.getRoomData(player.curr_room)
 
@@ -110,19 +114,31 @@ while playing:
         if curr_room_data[new_tile] == 101 :
             GamePrint("You slide a slimy eye back into place.", 'item')
             GamePrint("The world becomes clearer to you.", 'response')
-            world.removeItem(player.curr_room, new_tile)
+            world.itemRemove(player.curr_room, 101)
             player.inventoryAdd('world eye')
             pygame.mixer.Sound.play(s_item)
+
+            world.itemRemove(player.curr_room, 102)
+            GamePrint("You hear something crush your other eye", 'item')
+
             # need to find that item in our world dict and remove it though
         elif curr_room_data[new_tile] == 102 :
             GamePrint("You slide a slimy eye back into place.", 'item')
             GamePrint("You seem to step outside yourself.", 'response')
-            world.removeItem(player.curr_room, new_tile)
+            world.itemRemove(player.curr_room, 102)
             player.inventoryAdd('self eye')
             pygame.mixer.Sound.play(s_item)
+
+            world.itemRemove(player.curr_room, 101)
+            GamePrint("You hear something crush your other eye.", 'item')
+        elif curr_room_data[new_tile] == 171 : 
+            GamePrint("You feel invigorated.", 'item')
+            world.itemRemove(player.curr_room, 171)
+
+            pygame.mixer.Sound.play(s_oneup)
         elif curr_room_data[new_tile] == 4:
             pygame.mixer.Sound.play(s_blocked_step)
-            GamePrint("something blocks your path.", 'response')
+            GamePrint("something blocks your path.", 'response', False)
     elif new_tile == -1 : # took a step, specifically down and outside the map
         pygame.mixer.Sound.play(s_blocked_step)
     elif new_tile != None : # took a step into empty space
@@ -137,12 +153,16 @@ while playing:
                 raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
             if curr_room_data[tile_coord] == 102 :
                 raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
+            if curr_room_data[tile_coord] == 171 :
+                raw_window.blit(oneup_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
     elif render_items: 
         for tile_coord in curr_room_data.keys() :
             if curr_room_data[tile_coord] == 101 :
                 raw_window.blit(eye_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
             if curr_room_data[tile_coord] == 102 :
                 raw_window.blit(eye2_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
+            if curr_room_data[tile_coord] == 171 :
+                raw_window.blit(oneup_sprite, (tile_coord[0] * 16, tile_coord[1] * 16))
     
     if player.inventoryContains('self eye') : 
         raw_window.blit(player_sprite, (player.pos[0] * 16, player.pos[1] * 16))
@@ -162,10 +182,10 @@ while playing:
 
     # ENEMY RENDERING + LOGIC (might be smart to decouple these later)
     # if in the same room as an (the) enemy
-    if player.curr_room == borg.curr_room :
-        borg.dest = tuple(player.pos)
-        if borg.move_to_dest() and death_counter == -1:
-            # borg.flip_dest()
+    if player.curr_room == kamikaze.curr_room :
+        kamikaze.dest = tuple(player.pos)
+        if kamikaze.move_to_dest() and death_counter == -1:
+            # kamikaze.flip_dest()
             player.inventoryRemove('self eye')
             player.inventoryRemove('world eye')
             player.inventoryAdd('text eye')
@@ -174,9 +194,9 @@ while playing:
             world.spawnItems()
             pygame.mixer.Sound.play(s_death)
         
-        # if player.pos == borg.pos and death_counter == 0: 
+        # if player.pos == kamikaze.pos and death_counter == 0: 
         if render_enemy:
-            raw_window.blit(enemy_sprite, (borg.pos[0] * 16, borg.pos[1] * 16))
+            raw_window.blit(enemy_sprite, (kamikaze.pos[0] * 16, kamikaze.pos[1] * 16))
 
     # text area =====           
     pygame.draw.rect(raw_window, (0, 0, 0), pygame.Rect(0, 144, WIN_WIDTH, 64))
@@ -200,6 +220,12 @@ while playing:
             pygame.mixer.Sound.play(s_respawn)
             GamePrint("A Fear of the Dark consumes you.", 'highlight')
             player.resetToStart()
+
+    if death_counter == 1:
+        if player.step_count == 5 :
+            GamePrint("Your eyes are somewhere in this dungeon.", 'highlight', False)
+        elif player.step_count == 10 :
+            GamePrint("The sword at the end calls your name.", 'highlight', False)
 
     # ==============================
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())

@@ -162,6 +162,8 @@ class Entity() :
             pass
         elif item == 'world eye' :
             pass
+        elif item == 'item eye' :
+            pass
 
     def inventoryRemove(self, item : str) -> None :
         if item in self.inventory :
